@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MyListItem"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical"
+    android:maxHeight="?android:attr/listPreferredItemHeight"
+    android:weightSum="4" >
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_weight="4" >
+
+        <include layout="@layout/lib_child_item" />
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/check"
+        style="@style/greenCheckboxStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:focusable="false"
+        android:gravity="center" >
+    </CheckBox>
+
+</LinearLayout>

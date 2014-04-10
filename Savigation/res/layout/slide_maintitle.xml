@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="45.0dp"
+    android:background="#ff425d" >
+
+    <ImageView
+        android:id="@+id/title_bar_menu_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:src="@drawable/ic_top_bar_category" />
+
+    <TextView
+        android:layout_width="1dp"
+        android:layout_height="fill_parent"
+        android:layout_toRightOf="@id/title_bar_menu_btn"
+        android:background="#5ca7ba" />
+
+    <TextView
+        android:id="@+id/title_bar_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="Choose App："
+        android:textColor="#ffffff"
+        android:textSize="18sp" />
+
+</RelativeLayout>

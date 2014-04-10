@@ -1,0 +1,26 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MyListItem"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ff425d"
+    android:gravity="center_vertical"
+    android:weightSum="4" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="4" >
+
+        <include layout="@layout/lib_child_item" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:gravity="right" >
+    </TextView>
+
+</RelativeLayout>

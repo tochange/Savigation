@@ -1,0 +1,61 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <com.tochange.yang.SlideMenu
+        android:id="@+id/slide_menu"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <include layout="@layout/slide_behindview" />
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="#93e0e9" >
+
+            <LinearLayout
+                android:id="@+id/title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true" >
+
+                <include layout="@layout/slide_maintitle" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/button_group"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true" >
+
+                <include layout="@layout/lib_button_group" />
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/listview"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/button_group"
+                android:layout_below="@id/title"
+                android:cacheColorHint="@android:color/transparent"
+                android:divider="#83d0d9"
+                android:dividerHeight="1px" >
+            </ListView>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true" >
+
+                <com.tochange.yang.FZProgressBar
+                    android:id="@+id/fancyBar1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </RelativeLayout>
+    </com.tochange.yang.SlideMenu>
+
+</RelativeLayout>

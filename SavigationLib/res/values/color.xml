@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="toast_col">#eeffccff</color>
+    <color name="button_col">#5ca7ba</color>
+</resources>
