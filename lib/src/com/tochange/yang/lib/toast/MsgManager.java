@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.devspark.appmsg;
+package com.tochange.yang.lib.toast;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -40,7 +40,7 @@ import java.util.WeakHashMap;
 import static android.app.Application.ActivityLifecycleCallbacks;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-import static com.devspark.appmsg.AppMsg.LENGTH_STICKY;
+import static com.tochange.yang.lib.toast.AppMsg.LENGTH_STICKY;
 
 /**
  * @author Evgeny Shishkin

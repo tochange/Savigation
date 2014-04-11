@@ -11,7 +11,6 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.tochange.yang.log;
 import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.tools.BackItemInfo;
 

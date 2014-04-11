@@ -34,7 +34,7 @@
             android:layout_height="1dp"
             android:layout_above="@+id/button" >
 
-            <com.tochange.yang.FZProgressBar
+            <com.tochange.yang.lib.FZProgressBar
                 android:id="@+id/fancyBarl"
                 android:layout_width="fill_parent"
                 android:layout_height="1dp"

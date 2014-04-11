@@ -2,20 +2,19 @@ package com.tochange.yang.sector.tools.screenshot;
 
 import java.io.File;
 
+import com.tochange.yang.lib.Utils;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.util.FloatMath;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
-
-import com.tochange.yang.Utils;
 
 public class ScreenShotViewListener implements OnTouchListener
 {

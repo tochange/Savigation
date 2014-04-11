@@ -1,4 +1,4 @@
-package com.tochange.yang;
+package com.tochange.yang.lib;
 
 import android.content.Context;
 import android.graphics.Canvas;

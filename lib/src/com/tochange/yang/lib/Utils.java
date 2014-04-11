@@ -1,7 +1,7 @@
-package com.tochange.yang;
+package com.tochange.yang.lib;
 
 import static android.view.Gravity.BOTTOM;
-import static com.devspark.appmsg.AppMsg.LENGTH_SHORT;
+import static com.tochange.yang.lib.toast.AppMsg.LENGTH_SHORT;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -41,8 +41,9 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Toast;
 
-import com.devspark.appmsg.AppMsg;
-import com.tochange.yang.FZProgressBar.Mode;
+import com.devspark.appmsg.R;
+import com.tochange.yang.lib.toast.AppMsg;
+import com.tochange.yang.lib.FZProgressBar.Mode;
 
 public class Utils
 {
@@ -424,11 +425,11 @@ public class Utils
             drawable.draw(canvas);
             int size = bitmap.getWidth() * bitmap.getHeight() * 4;
 
-            // 创建一个字节数组输出流,流的大小为size
+            // 鍒涘缓涓�釜瀛楄妭鏁扮粍杈撳嚭娴�娴佺殑澶у皬涓簊ize
             ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
-            // 设置位图的压缩格式，质量为100%，并放入字节数组输出流中
+            // 璁剧疆浣嶅浘鐨勫帇缂╂牸寮忥紝璐ㄩ噺涓�00%锛屽苟鏀惧叆瀛楄妭鏁扮粍杈撳嚭娴佷腑
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-            // 将字节数组输出流转化为字节数组byte[]
+            // 灏嗗瓧鑺傛暟缁勮緭鍑烘祦杞寲涓哄瓧鑺傛暟缁刡yte[]
             byte[] imagedata = baos.toByteArray();
 
             String icon = Base64.encodeToString(imagedata, Base64.DEFAULT);
@@ -459,14 +460,14 @@ public class Utils
 
     }
 
-    // 从资源中获取Bitmap
+    // 浠庤祫婧愪腑鑾峰彇Bitmap
     public static Bitmap getBitmapFromResources(Activity act, int resId)
     {
         Resources res = act.getResources();
         return BitmapFactory.decodeResource(res, resId);
     }
 
-    // byte[] → Bitmap
+    // byte[] 鈫�Bitmap
     public static Bitmap convertBytes2Bimap(byte[] b)
     {
         if (b.length == 0)
@@ -476,7 +477,7 @@ public class Utils
         return BitmapFactory.decodeByteArray(b, 0, b.length);
     }
 
-    // Bitmap → byte[]
+    // Bitmap 鈫�byte[]
     public static byte[] convertBitmap2Bytes(Bitmap bm)
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -498,11 +499,11 @@ public class Utils
         return bd.getBitmap();
     }
 
-    // Bitmap → Drawable
+    // Bitmap 鈫�Drawable
     public static Drawable convertBitmap2Drawable(Bitmap bitmap)
     {
         BitmapDrawable bd = new BitmapDrawable(bitmap);
-        // 因为BtimapDrawable是Drawable的子类，最终直接使用bd对象即可。
+        // 鍥犱负BtimapDrawable鏄疍rawable鐨勫瓙绫伙紝鏈�粓鐩存帴浣跨敤bd瀵硅薄鍗冲彲銆�
         return bd;
     }
 
@@ -523,7 +524,7 @@ public class Utils
         return bitmap;
     }
 
-    /*************************** 图片圆角处理 ********************************/
+    /*************************** 鍥剧墖鍦嗚澶勭悊 ********************************/
     public static Bitmap getRCB(Bitmap bitmap, float roundPX)
     {
         Bitmap dstbmp = Bitmap.createBitmap(bitmap.getWidth(),

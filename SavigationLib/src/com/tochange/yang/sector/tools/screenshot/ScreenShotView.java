@@ -14,7 +14,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.tochange.yang.R;
-import com.tochange.yang.log;
 import com.tochange.yang.sector.tools.screenshot.ScreenShotActivity.CaptureCallBack;
 
 public class ScreenShotView extends View
@@ -69,7 +68,6 @@ public class ScreenShotView extends View
     public ScreenShotView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        log.e("CaptureView");
         lineCapturePaint.setStrokeWidth(2F); // 捕获框边框画笔大小
         lineCapturePaint.setStyle(Paint.Style.STROKE);// 画笔风格:空心
         lineCapturePaint.setAntiAlias(true); // 抗锯齿
@@ -115,7 +113,6 @@ public class ScreenShotView extends View
             int bottom)
     {
         super.onLayout(changed, left, top, right, bottom);
-        log.e("onLayout");
         // 初始化可视范围及框体大小
         viewRect = new Rect(left, top, right, bottom);
         int viewWidth = right - left;

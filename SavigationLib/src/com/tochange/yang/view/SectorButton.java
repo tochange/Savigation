@@ -24,8 +24,8 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.tochange.yang.R;
-import com.tochange.yang.Utils;
-import com.tochange.yang.log;
+import com.tochange.yang.lib.Utils;
+import com.tochange.yang.lib.log;
 
 public class SectorButton extends RelativeLayout
 {
@@ -138,7 +138,8 @@ public class SectorButton extends RelativeLayout
         @Override
         protected void onPostExecute(String result)
         {
-        	if(mIsback && mFatherItem.getIsOpen()){
+        	log.e("mVisible=" + mVisible);
+        	if (mVisible){
             	mFatherItem.setVisibility(View.VISIBLE);
             }else
             	mFatherItem.setVisibility(View.INVISIBLE);
@@ -148,9 +149,10 @@ public class SectorButton extends RelativeLayout
     }
     public void inScaleFather()
     {
-        // && !(mFatherItem.getVisibility() == View.INVISIBLE)
+        //  && !(mFatherItem.getVisibility() == View.INVISIBLE)
         if (!mFatherItem.getIsOpen())
-        {
+        {   mVisible =false;
+        log.e("beging..........." + mVisible);
             Animation alphaAnimation = new AlphaAnimation(1, 0);
             alphaAnimation.setDuration(10 * SCALE_TIME);
             mFatherItem.startAnimation(alphaAnimation);
@@ -158,10 +160,11 @@ public class SectorButton extends RelativeLayout
         
         }
     }
+    boolean mVisible;
     private void outScaleFather()
     {
+    	log.e("");
     	mFatherItem.clearAnimation();
-    	log.e("VISIBLE");
         mFatherItem.setVisibility(View.VISIBLE);
         mFatherItem.startAnimation(getScaleAnimation(-1, 0f, 1f, LINE_TIME));
     }
@@ -217,7 +220,8 @@ public class SectorButton extends RelativeLayout
         final LayoutParams lp = (LayoutParams) getLayoutParams();
         if (mFatherItem.getIsOpen())
         {
-
+        	mVisible = true;
+        	log.e("VISIBLE");
             // may be no need to do so if you write broadcast receiver to catch
             // all kind of back item event
             if (mIsback)
@@ -252,8 +256,7 @@ public class SectorButton extends RelativeLayout
                 break;
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_OUTSIDE:
-//            	mFatherItem.getVisibility() == View.INVISIBLE && 
-                if (!mFatherItem.getIsOpen())
+                if (mFatherItem.getVisibility() == View.INVISIBLE && !mFatherItem.getIsOpen())
                 {	
                     outScaleFather();
                 }

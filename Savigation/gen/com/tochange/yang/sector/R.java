@@ -15,11 +15,11 @@ public final class R {
     public static final class attr {
     }
     public static final class color {
-        public static final int alert=0x7f060000;
-        public static final int button_col=0x7f060004;
-        public static final int confirm=0x7f060001;
-        public static final int info=0x7f060002;
-        public static final int toast_col=0x7f060003;
+        public static final int alert=0x7f060002;
+        public static final int button_col=0x7f060000;
+        public static final int confirm=0x7f060003;
+        public static final int info=0x7f060004;
+        public static final int toast_col=0x7f060001;
     }
     public static final class drawable {
         public static final int airplane=0x7f020000;

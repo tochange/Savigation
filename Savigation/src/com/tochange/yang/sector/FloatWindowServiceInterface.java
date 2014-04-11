@@ -1,5 +1,6 @@
 package com.tochange.yang.sector;
 
+import android.content.Intent;
 import android.view.GestureDetector;
 import android.view.WindowManager.LayoutParams;
 
@@ -10,6 +11,8 @@ public interface FloatWindowServiceInterface
     void setLayoutParamsWidthAndHight(LayoutParams layouparameter);
 
     void initEnvironment();
+    
+    Intent getIntent(Intent intent);
 
     GestureDetector getGestureDetector();
 

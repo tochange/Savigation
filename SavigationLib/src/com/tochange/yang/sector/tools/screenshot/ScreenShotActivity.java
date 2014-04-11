@@ -21,10 +21,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.tochange.yang.FZProgressBar;
 import com.tochange.yang.R;
-import com.tochange.yang.Utils;
-import com.tochange.yang.log;
+import com.tochange.yang.lib.FZProgressBar;
+import com.tochange.yang.lib.Utils;
+import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.tools.AppUtils;
 
 public class ScreenShotActivity extends Activity implements OnClickListener,

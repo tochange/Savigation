@@ -1,4 +1,4 @@
-package com.tochange.yang;
+package com.tochange.yang.lib;
 
 public class log
 {
@@ -157,16 +157,13 @@ public class log
 //                .toString();
     }
 
-    // Log.d(TAG,new Exception().getStackTrace()[0].getMethodName()); //函数名
-    // Log.d(TAG, Thread.currentThread().getStackTrace()[2].getMethodName());
-    // //函数名
-    // Log.d(TAG, ""+Thread.currentThread().getStackTrace()[2].getLineNumber());
-    // //行号
+    // Log.d(TAG,new Exception().getStackTrace()[0].getMethodName()); //鍑芥暟鍚�    // Log.d(TAG, Thread.currentThread().getStackTrace()[2].getMethodName());
+    // //鍑芥暟鍚�    // Log.d(TAG, ""+Thread.currentThread().getStackTrace()[2].getLineNumber());
+    // //琛屽彿
     // Log.d(TAG, Thread.currentThread().getStackTrace()[2].getFileName());
-    // //文件名
-    //
+    // //鏂囦欢鍚�    //
     // Log.d(TAG, "["+Thread.currentThread().getStackTrace()[2].getFileName()
     // +","+Thread.currentThread().getStackTrace()[2].getLineNumber()+"]");
-    // //文件名+行号
+    // //鏂囦欢鍚�琛屽彿
 
 }

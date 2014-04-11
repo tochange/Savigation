@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.devspark.appmsg;
+package com.tochange.yang.lib.toast;
+
+import com.devspark.appmsg.R;
 
 import android.app.Activity;
 import android.content.Context;
@@ -56,10 +58,10 @@ public class AppMsg {
      * <p>Show the view or text notification for an undefined amount of time
      * -Usually until an invocation of {@link #cancel()}, {@link #cancelAll(android.app.Activity)},
      * {@link #cancelAll()} or {@link android.app.Activity#onDestroy()}-,
-     * stacking on top of any other {@link com.devspark.appmsg.AppMsg} with this duration.</p>
+     * stacking on top of any other {@link com.tochange.yang.lib.toast.AppMsg} with this duration.</p>
      *
      * <p><b>Note</b>: You are responsible
-     * for calling {@link #cancel()} on such {@link com.devspark.appmsg.AppMsg}.</p>
+     * for calling {@link #cancel()} on such {@link com.tochange.yang.lib.toast.AppMsg}.</p>
      *
      * @see #setDuration
      */
