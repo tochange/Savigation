@@ -79,8 +79,6 @@ public class SectorButtonMainActivity extends Activity implements
 	}
 
 	private class PutParameterTask extends AsyncTask<String, Integer, String> {
-		ListToAdapter listener;
-
 		@Override
 		protected void onPreExecute() {
 			mListView.setVisibility(View.GONE);
