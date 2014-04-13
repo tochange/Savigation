@@ -23,7 +23,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.tochange.yang.R;
+import com.devspark.appmsg.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
 
