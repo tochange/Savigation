@@ -315,7 +315,7 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
                 mPicFile[0] = mPicName;
                 mShowCutImageView.setImageBitmap(BitmapFactory
                         .decodeFile(mPicName));
-                log.e("==" + mPicName);
+//                log.e("file=" + mPicName);
                 mShowCutImageView.setVisibility(View.VISIBLE);
 
                 mCut.setText(R.string.ok_save);
@@ -325,7 +325,7 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
             {
                 mCancel.setText(R.string.cancel_exit);
                 mCut.setText(R.string.ok_full);
-                Utils.Toast(ScreenShotActivity.this, "fail to capture.");
+                Utils.Toast(ScreenShotActivity.this, "fail to capture,pad or unrooted device is unavailable.");
             }
             mCaptureView.reset();
             // not working

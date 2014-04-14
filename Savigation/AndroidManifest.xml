@@ -27,9 +27,15 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
 
-        <service android:name=".BaseFloatWindowService" >
+        <receiver android:name=".screenobserver.ScreenUnlockReceiver" >
+            <intent-filter android:priority="90000" >
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".service.BaseFloatWindowService" >
         </service>
-        <service android:name=".FloatWindowService" >
+        <service android:name=".service.FloatWindowService" >
         </service>
     </application>
 

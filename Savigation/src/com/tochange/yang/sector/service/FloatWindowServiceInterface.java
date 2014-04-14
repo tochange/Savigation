@@ -1,6 +1,5 @@
-package com.tochange.yang.sector;
+package com.tochange.yang.sector.service;
 
-import android.content.Intent;
 import android.view.GestureDetector;
 import android.view.WindowManager.LayoutParams;
 
@@ -12,8 +11,6 @@ public interface FloatWindowServiceInterface
 
     void initEnvironment();
     
-    Intent getIntent(Intent intent);
-
     GestureDetector getGestureDetector();
 
     ChildrenInterface getChildrenLinster();

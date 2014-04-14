@@ -1,4 +1,4 @@
-package com.tochange.yang.sector.background;
+package com.tochange.yang.sector.shake;
 
 public interface ShakeInterface
 {

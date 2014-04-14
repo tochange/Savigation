@@ -57,7 +57,7 @@ public class BackPanelBin {
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 	}
 
-	public void doit(int type) throws SettingNotFoundException {
+	public void openToolByType(int type){
 		// log.e("type =" + type);
 		// index = 128;
 		switch (type) {

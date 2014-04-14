@@ -16,6 +16,7 @@ public class AppUtils {
 	public static final String KEY_ISREOPEN                         = "isreopen";
 	public static final String KEY_BACKPANEL_VALUES                 = "values";
 	
+	public static final String PREFERENCES_ISREOPEN                 = "preferenceisreopen";
 	public static final String PREFERENCES_FILENAME                 = "position&iconmessage";
 	public static final String PREFERENCESNAME_POSITION_X           = "xposition";
 	public static final String PREFERENCESNAME_POSITION_Y           = "yposition";

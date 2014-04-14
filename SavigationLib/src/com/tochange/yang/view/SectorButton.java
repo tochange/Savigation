@@ -23,7 +23,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.devspark.appmsg.R;
+import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
 
@@ -76,13 +76,12 @@ public class SectorButton extends RelativeLayout
 
     private int mEvilMarginTop;
 
-    private List<Item> mUpdateBackChild;
-
     private boolean mCanRotate = true;
+
+    private boolean mFatherVisible;
 
     private boolean mIsSticky;
 
-    // private boolean mCanRotateOpen = true;
     private int mMoveTimes = 0;
 
     private boolean mIsback = false;
@@ -95,7 +94,6 @@ public class SectorButton extends RelativeLayout
     {
         super(context, attrs);
         mContext = context;
-        log.e("context=" + context.getClass());
 
         mChildrenList = new ArrayList<Item>();
         // mBackupChildrenList = new ArrayList<Item>();
@@ -125,46 +123,23 @@ public class SectorButton extends RelativeLayout
         mIsSticky = isSticky;
     }
 
-    private class SleepTask extends AsyncTask<String, Integer, String>
-    {
-
-        @Override
-        protected String doInBackground(String... params)
-        {
-            Utils.sleep(10 * SCALE_TIME);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result)
-        {
-        	log.e("mVisible=" + mVisible);
-        	if (mVisible){
-            	mFatherItem.setVisibility(View.VISIBLE);
-            }else
-            	mFatherItem.setVisibility(View.INVISIBLE);
-            super.onPostExecute(result);
-        }
-
-    }
     public void inScaleFather()
     {
-        //  && !(mFatherItem.getVisibility() == View.INVISIBLE)
+        // && !(mFatherItem.getVisibility() == View.INVISIBLE)
         if (!mFatherItem.getIsOpen())
-        {   mVisible =false;
-        log.e("beging..........." + mVisible);
+        {
+            mFatherVisible = false;
             Animation alphaAnimation = new AlphaAnimation(1, 0);
             alphaAnimation.setDuration(10 * SCALE_TIME);
             mFatherItem.startAnimation(alphaAnimation);
-          new SleepTask().execute();
-        
+            new SleepTask().execute();
         }
     }
-    boolean mVisible;
+
     private void outScaleFather()
     {
-    	log.e("");
-    	mFatherItem.clearAnimation();
+        log.e("");
+        mFatherItem.clearAnimation();
         mFatherItem.setVisibility(View.VISIBLE);
         mFatherItem.startAnimation(getScaleAnimation(-1, 0f, 1f, LINE_TIME));
     }
@@ -177,33 +152,22 @@ public class SectorButton extends RelativeLayout
         return mFatherItem;
     }
 
-    public void updateBackPanelChild(List<Item> backchild)
+    // public void updateBackPanelChild(List<Item> backchild)
+    // {
+    // mNeedUpdateBackChild = true;
+    // // mUpdateBackChild = backchild;
+    //
+    // }
+
+    public void updateBackPanelChild()
     {
         mNeedUpdateBackChild = true;
-        mUpdateBackChild = backchild;
-
     }
 
     public void initData(List<List<Item>> childListOut)
     {
         mAllChildrenList = childListOut;
         initChild();
-    }
-
-    private void initChild()
-    {
-        SectorButton.this.removeAllViews();
-        mChildrenList.clear();
-        if (mIsback)
-        {
-            mChildrenList.addAll(mAllChildrenList.get(1));
-            addAllItems(mAllChildrenList.get(1));
-        }
-        else
-        {// app data load first(in app project),then shortcut data in back side
-            mChildrenList.addAll(mAllChildrenList.get(0));
-            addAllItems(mAllChildrenList.get(0));// default load app
-        }
     }
 
     public void setLinster(ChildrenInterface pathAnimMenuLinster)
@@ -220,8 +184,7 @@ public class SectorButton extends RelativeLayout
         final LayoutParams lp = (LayoutParams) getLayoutParams();
         if (mFatherItem.getIsOpen())
         {
-        	mVisible = true;
-        	log.e("VISIBLE");
+            mFatherVisible = true;
             // may be no need to do so if you write broadcast receiver to catch
             // all kind of back item event
             if (mIsback)
@@ -242,7 +205,6 @@ public class SectorButton extends RelativeLayout
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        // log.e("event.getAction()=" + event.getAction());
         switch (event.getAction())
         {
             case MotionEvent.ACTION_MOVE:
@@ -250,14 +212,14 @@ public class SectorButton extends RelativeLayout
                 if (mCanRotate && mMoveTimes > 5)
                 {
                     mCanRotate = false;
-                    // if (mCanRotateOpen)
                     rotate();
                 }
                 break;
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_OUTSIDE:
-                if (mFatherItem.getVisibility() == View.INVISIBLE && !mFatherItem.getIsOpen())
-                {	
+                if (mFatherItem.getVisibility() == View.INVISIBLE
+                        && !mFatherItem.getIsOpen())
+                {
                     outScaleFather();
                 }
                 mMoveTimes = 0;
@@ -265,10 +227,7 @@ public class SectorButton extends RelativeLayout
 
             case MotionEvent.ACTION_UP:
                 if (mCanRotate && mFatherItem.getIsOpen())
-                {
-                    log.e("close..");
                     touchToClose();
-                }
                 mCanRotate = true;
                 break;
             default:
@@ -276,6 +235,22 @@ public class SectorButton extends RelativeLayout
         }
 
         return true;// super.onTouchEvent(event);
+    }
+
+    private void initChild()
+    {
+        SectorButton.this.removeAllViews();
+        mChildrenList.clear();
+        if (mIsback)
+        {
+            mChildrenList.addAll(mAllChildrenList.get(1));
+            addAllItems(mAllChildrenList.get(1));
+        }
+        else
+        {// app data load first(in app project),then shortcut data in back side
+            mChildrenList.addAll(mAllChildrenList.get(0));
+            addAllItems(mAllChildrenList.get(0));// default load app
+        }
     }
 
     private View.OnClickListener mFatherListener = new View.OnClickListener() {
@@ -675,7 +650,6 @@ public class SectorButton extends RelativeLayout
                 @Override
                 public void onAnimationRepeat(Animation animation)
                 {
-
                 }
 
                 @Override
@@ -772,11 +746,10 @@ public class SectorButton extends RelativeLayout
                     // setAnimation(scaleAnimation);
 
                     LayoutParams lp = (LayoutParams) getLayoutParams();
-                    lp.width =  FATHER_WIDTH;
-                    lp.height =  FATHER_WIDTH;
+                    lp.width = FATHER_WIDTH;
+                    lp.height = FATHER_WIDTH;
                     setLayoutParams(lp);
-                    
-                    
+
                     if (mNeedUpdateBackChild)
                     {
                         initChild();
@@ -785,7 +758,7 @@ public class SectorButton extends RelativeLayout
                     if (mIsSticky)
                     {
                         inScaleFather();
-                        //no work
+                        // no work
                         // new SleepTask().execute();
                     }
                 }
@@ -795,7 +768,6 @@ public class SectorButton extends RelativeLayout
 
     private void rotate()
     {
-        // mCanRotateOpen = false;
         Animation aniback = AnimationUtils.loadAnimation(mContext,
                 R.anim.rotate_back);
         aniback.setAnimationListener(new AnimationListener() {
@@ -850,5 +822,27 @@ public class SectorButton extends RelativeLayout
         {
             mHandler.sendEmptyMessage(intData);
         }
+    }
+
+    private class SleepTask extends AsyncTask<String, Integer, String>
+    {
+
+        @Override
+        protected String doInBackground(String... params)
+        {
+            Utils.sleep(10 * SCALE_TIME);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            if (mFatherVisible)
+                mFatherItem.setVisibility(View.VISIBLE);
+            else
+                mFatherItem.setVisibility(View.INVISIBLE);
+            super.onPostExecute(result);
+        }
+
     }
 }

@@ -24,6 +24,8 @@ import com.tochange.yang.lib.SlideMenu;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.sector.background.AppData;
 import com.tochange.yang.sector.background.ListToAdapter;
+import com.tochange.yang.sector.service.BaseFloatWindowService;
+import com.tochange.yang.sector.service.FloatWindowService;
 import com.tochange.yang.sector.tools.AppUtils;
 import com.tochange.yang.sector.tools.BackItemInfo;
 
@@ -120,7 +122,6 @@ public class SectorButtonMainActivity extends Activity implements
 					editor.putString(AppUtils.KEY_PACKAGENAME + size,
 							tmp.packageName);
 					size++;
-					// log.e("size=" + size);
 				}
 
 			}
@@ -128,9 +129,7 @@ public class SectorButtonMainActivity extends Activity implements
 			editor.putInt(AppUtils.KEY_BACKPANEL_VALUES, value);
 			editor.putInt(AppUtils.KEY_SIZE, size);
 			editor.commit();
-			// log.e("value=" + value);
 			intent.putExtra(AppUtils.KEY_SIZE, size);
-			// log.e("w=" + d.getWidth() + "  h=" + d.getHeight());
 			stopService(intent);// now can change child without close app
 			startService(intent);
 			return null;
@@ -187,7 +186,7 @@ public class SectorButtonMainActivity extends Activity implements
 		case R.id.button_left:
 			// how to get service class name?
 			if (Utils.serviceIsRunning(SectorButtonMainActivity.this,
-					getPackageName() + ".FloatWindowService")) {
+					getPackageName() + ".service.FloatWindowService")) {
 				Intent intent = new Intent(SectorButtonMainActivity.this,
 						FloatWindowService.class);
 				stopService(intent);
@@ -200,6 +199,7 @@ public class SectorButtonMainActivity extends Activity implements
 					Toast.makeText(SectorButtonMainActivity.this,
 							"haven't choose any item!", Toast.LENGTH_SHORT)
 							.show();
+				BaseFloatWindowService.mNotificationManager.cancelAll();
 			}
 			break;
 		}

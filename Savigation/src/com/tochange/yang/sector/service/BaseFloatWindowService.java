@@ -1,4 +1,4 @@
-package com.tochange.yang.sector;
+package com.tochange.yang.sector.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,9 @@ import android.widget.RelativeLayout;
 import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
-import com.tochange.yang.sector.background.ShakeInterface;
-import com.tochange.yang.sector.background.ShakeListener;
+import com.tochange.yang.sector.screenobserver.ScreenObserver;
+import com.tochange.yang.sector.shake.ShakeInterface;
+import com.tochange.yang.sector.shake.ShakeListener;
 import com.tochange.yang.sector.tools.AppUtils;
 import com.tochange.yang.sector.tools.BackItemInfo;
 import com.tochange.yang.sector.tools.BackPanelBin;
@@ -49,6 +50,7 @@ public abstract class BaseFloatWindowService extends Service implements
 	protected boolean mStickyHasReset;
 
 	protected boolean mCanNew = true;
+
 	/**
 	 * sticky to the border of your screen
 	 */
@@ -57,10 +59,13 @@ public abstract class BaseFloatWindowService extends Service implements
 	protected boolean mCanMove = true;
 
 	protected boolean mIsSticky;
+
 	protected boolean mIsMoving;
+
 	protected boolean mAlreadyDestory;
 
 	protected int mSleepTime = 10;
+
 	// if stick too slowly,moving when being alpha will awkward,so be quick
 	protected final int STICKY_OFFSET = 50;
 
@@ -90,23 +95,28 @@ public abstract class BaseFloatWindowService extends Service implements
 
 	protected SharedPreferences mSharedPreferences;
 
-	// why must be static?
 	protected static final int SEND_NOTIFICATION = 47;
 
 	protected static final int CLEAR_NOTIFICATION = 48;
 
-	protected NotificationManager mNotificationManager;
+	// i donn't know how to clear notification in main activity,just use static
+	// variable
+	public static NotificationManager mNotificationManager;
 
 	protected ShakeListener mShakeListener;
 
 	protected BackPanelBin mBackPanelBin;
+
 	protected ScreenObserver mScreenObserver;
+
+	public static BaseFloatWindowService instance;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		log.e("");
-		mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		instance = this;
+		if (mNotificationManager == null)
+			mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mVibrator = (Vibrator) getApplication().getSystemService(
 				Service.VIBRATOR_SERVICE);
 		mGestureDetector = getGestureDetector();
@@ -115,29 +125,16 @@ public abstract class BaseFloatWindowService extends Service implements
 				getApplication().WINDOW_SERVICE);
 		mSharedPreferences = getSharedPreferences(
 				AppUtils.PREFERENCES_FILENAME, Context.MODE_PRIVATE);
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		return super.onStartCommand(intent, flags, startId);
+		mBackPanelBin = new BackPanelBin(this);
 	}
 
 	@Override
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
-		initEnvironment();
-		mBackPanelBin = new BackPanelBin(this);
-		mLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;// forever
+		initEnvironment();// mBackPanelBin = new BackPanelBin(this);
 		mIntent = intent;
-
 		setLayoutParamsWidthAndHight(mLayoutParams);
-		mLayoutParams.type = LayoutParams.TYPE_PRIORITY_PHONE;
-		mLayoutParams.format = PixelFormat.RGBA_8888;// transparent
-		mLayoutParams.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
-				| LayoutParams.FLAG_NOT_FOCUSABLE
-				| LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-		mLayoutParams.width = LayoutParams.WRAP_CONTENT;
-		mLayoutParams.height = LayoutParams.WRAP_CONTENT;// -2
+		setLayoutParameter(mLayoutParams);
 		if (mCanNew) {
 			mCanNew = false;
 			createFloatView();
@@ -150,7 +147,7 @@ public abstract class BaseFloatWindowService extends Service implements
 						mSectorButton.setSticky(!mIsSticky);
 						stickBorder();
 						mIsSticky = !mIsSticky;
-						mShakeListener.stop();
+						mShakeListener.stopShakeListen();
 						new Handler().postDelayed(new Runnable() {
 							@Override
 							public void run() {
@@ -164,16 +161,23 @@ public abstract class BaseFloatWindowService extends Service implements
 		}
 	}
 
+	private void setLayoutParameter(LayoutParams lp) {
+		lp.gravity = Gravity.LEFT | Gravity.TOP;// forever
+		lp.type = LayoutParams.TYPE_PRIORITY_PHONE;
+		lp.format = PixelFormat.RGBA_8888;// transparent
+		lp.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
+				| LayoutParams.FLAG_NOT_FOCUSABLE
+				| LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+		lp.width = LayoutParams.WRAP_CONTENT;
+		lp.height = LayoutParams.WRAP_CONTENT;// -2
+
+	}
+
 	private void createFloatView() {
 		mFloatLayout = (RelativeLayout) LayoutInflater.from(getApplication())
 				.inflate(R.layout.sectorbutton_view, null);
 		mWindowManager.addView(mFloatLayout, mLayoutParams);
-		mSectorButton = (SectorButton) mFloatLayout.findViewById(R.id.pm);
-		mFatherItem = mSectorButton.getFatherItem();
-		mSectorButton.initData(initChildrenItemList());
-		mEvilMarginTop = mSectorButton.getEvilMarginTop();
-		// mLayoutParams.dimAmount = 0.6f;
-		mSectorButton.setLinster(getChildrenLinster());
+		getAndSetSectorButton();
 		mFatherItem.setOnTouchListener(new OnTouchListener() {
 
 			@Override
@@ -183,7 +187,6 @@ public abstract class BaseFloatWindowService extends Service implements
 				if (mIsMoving && event.getAction() == MotionEvent.ACTION_UP) {
 					mIsMoving = false;
 					saveCurrentPosition();
-
 					if (mIsSticky && !mStickyHasReset) {
 						mStickyHasReset = true;
 						// sleep more time to make sure last
@@ -199,46 +202,49 @@ public abstract class BaseFloatWindowService extends Service implements
 		});
 	}
 
+	private void getAndSetSectorButton() {
+		mSectorButton = (SectorButton) mFloatLayout.findViewById(R.id.sector);
+		mFatherItem = mSectorButton.getFatherItem();
+		mSectorButton.initData(initChildrenItemList());
+		mEvilMarginTop = mSectorButton.getEvilMarginTop();
+		// mLayoutParams.dimAmount = 0.6f;
+		mSectorButton.setLinster(getChildrenLinster());
+	}
+
 	private List<List<Item>> initChildrenItemList() {
 		List<List<Item>> ret = new ArrayList<List<Item>>();
 		List<Item> appItemList = new ArrayList<Item>();
-		int value = -1;
-		int size = -1;
+		int value, size;
 		if (mIntent != null
 				&& !mIntent.getBooleanExtra(AppUtils.KEY_ISREOPEN, false)) {
 			size = mIntent.getIntExtra(AppUtils.KEY_SIZE, -1);
 			value = mIntent.getIntExtra(AppUtils.KEY_BACKPANEL_VALUES, -1);
 			for (int i = 0; i < size; i++) {
-				String imageString = mIntent
-						.getStringExtra(AppUtils.KEY_IMAGESTRING + i);
-				String packagename = mIntent
-						.getStringExtra(AppUtils.KEY_PACKAGENAME + i);
-				addImageStringToChildList(imageString, appItemList);
+				addImageStringToChildList(
+						mIntent.getStringExtra(AppUtils.KEY_IMAGESTRING + i),
+						appItemList);
 			}
-			log.e("store.........value=" + value);
 		} else {// when service auto start intent will be null,get last time
 				// parameters
 			size = mSharedPreferences.getInt(AppUtils.KEY_SIZE, -1);
 			value = mSharedPreferences
 					.getInt(AppUtils.KEY_BACKPANEL_VALUES, -1);
 
-			log.e("get.........value=" + value);
-			// add 30140224
 			if (mIntent == null)
 				mIntent = new Intent(this, FloatWindowService.class);
 			mIntent.putExtra(AppUtils.KEY_SIZE, size);
 			mIntent.putExtra(AppUtils.KEY_BACKPANEL_VALUES, value);
 			for (int i = 0; i < size; i++) {
-				String imageString = mSharedPreferences.getString(
-						AppUtils.KEY_IMAGESTRING + i, "default imagestring");
-				addImageStringToChildList(imageString, appItemList);
-
-				// add 30140224
-				String packageName = mSharedPreferences.getString(
-						AppUtils.KEY_PACKAGENAME + i, "default packgename");
-				mIntent.putExtra(AppUtils.KEY_PACKAGENAME + i, packageName);
+				addImageStringToChildList(
+						mSharedPreferences.getString(AppUtils.KEY_IMAGESTRING
+								+ i, "default imagestring"), appItemList);
+				mIntent.putExtra(
+						AppUtils.KEY_PACKAGENAME + i,
+						mSharedPreferences.getString(AppUtils.KEY_PACKAGENAME
+								+ i, "default packgename"));
 			}
 		}
+//		log.e("value=" + value);
 		mChoosedBackClildItemList = getBackChildListByValue(value);
 		ret.add(appItemList);// pay attention to the order
 		ret.add(mChoosedBackClildItemList);
@@ -303,6 +309,12 @@ public abstract class BaseFloatWindowService extends Service implements
 				.getOval(Utils.string2Bitmap(imageString)))));
 		resultList.add(child);
 
+	}
+
+	protected void saveIsReopen(boolean isReopen) {
+		Editor editor = mSharedPreferences.edit();
+		editor.putBoolean(AppUtils.PREFERENCES_ISREOPEN, isReopen);
+		editor.commit();
 	}
 
 	protected void saveCurrentPosition() {

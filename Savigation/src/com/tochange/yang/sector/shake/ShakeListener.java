@@ -1,4 +1,4 @@
-package com.tochange.yang.sector.background;
+package com.tochange.yang.sector.shake;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -52,10 +52,9 @@ public class ShakeListener implements SensorEventListener
 
     }
 
-    public void stop()
+    public void stopShakeListen()
     {
         sensorManager.unregisterListener(this);
-        // log.e("unregister");
     }
 
     public void setOnShakeListener(ShakeInterface listener)
