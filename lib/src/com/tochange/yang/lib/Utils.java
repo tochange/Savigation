@@ -8,8 +8,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
@@ -42,8 +46,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.devspark.appmsg.R;
-import com.tochange.yang.lib.toast.AppMsg;
 import com.tochange.yang.lib.FZProgressBar.Mode;
+import com.tochange.yang.lib.toast.AppMsg;
 
 public class Utils
 {
@@ -52,6 +56,99 @@ public class Utils
     public static void setContext(Context c)
     {
         mContext = c;
+    }
+
+    static class FileInfos
+    {
+        Calendar c;
+
+        File file;
+
+        public FileInfos(Calendar c, File file)
+        {
+            this.c = c;
+            this.file = file;
+        }
+    }
+
+    static class TimeComparator implements Comparator<FileInfos>
+    {
+        public int compare(FileInfos o1, FileInfos o2)
+        {
+            return (o1.c.compareTo(o2.c));
+        }
+    }
+
+    public static List<FileInfos> getDeletedFiles(String path, String appName)
+    {
+        ArrayList<FileInfos> ret = new ArrayList<FileInfos>();
+        File f = new File(path);
+        if (!f.isDirectory())
+            log.e(path + " not a directory!");
+        else
+        {
+            File[] fileList = f.listFiles();
+            getFileInfo(fileList, ret, appName);
+        }
+
+        Collections.sort(ret, new TimeComparator());
+
+//        for (FileInfos ff : ret)
+//            log.e(ff.file.getAbsolutePath());
+        if (ret.size() >= 10)
+            return ret.subList(0, ret.size() - 10);
+        else
+            return null;
+    }
+
+    public static void getFileInfo(File[] fileList, ArrayList<FileInfos> list,
+            String appName)
+    {
+        for (int i = 0; i < fileList.length; i++)
+        {
+            File tmp = fileList[i];
+            String path = tmp.getAbsolutePath();
+            if (tmp.isFile() && path.contains(appName)
+                    && !path.endsWith(appName))
+            {
+                path = path.replace("_", "-").replace(".", "-");
+                String[] array = path.split("-");
+                Calendar c = Calendar.getInstance();
+                c.set(Integer.parseInt(array[1]), Integer.parseInt(array[2]),
+                        Integer.parseInt(array[3]), Integer.parseInt(array[4]),
+                        Integer.parseInt(array[5]), Integer.parseInt(array[6]));
+                list.add(new FileInfos(c, tmp));
+            }
+            else if (tmp.isDirectory())
+            {
+                getFileInfo(tmp.listFiles(), list, appName);
+            }
+        }
+    }
+
+    static void getFileStat(String path)
+    {
+        try
+        {
+            Process p = Runtime.getRuntime().exec("stat " + path);
+            p.waitFor();
+            BufferedReader bf = new BufferedReader(new InputStreamReader(
+                    p.getInputStream()));
+            String line = bf.readLine();
+            while (line != null)
+            {
+                line = bf.readLine();
+                log.e("line=" + line);
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public static void sleep(int millisecond)
@@ -484,7 +581,7 @@ public class Utils
         bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
         return baos.toByteArray();
     }
-    
+
     public static Bitmap string2Bitmap(String s)
     {
         Bitmap b;
