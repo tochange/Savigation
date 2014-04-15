@@ -14,6 +14,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.RemoteViews;
 
 import com.tochange.yang.R;
+import com.tochange.yang.lib.SimpleLogFile;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
@@ -414,8 +415,8 @@ public class FloatWindowService extends BaseFloatWindowService
     private void doSomethingOnScreenOff()
     {
 //        log.e("Screen is off");
-        // mShakeListener.stop();
-        sendNotification(SEND_NOTIFICATION, 2, "i'am hiding here..  >.<");
+        if(mIntent != null)
+           sendNotification(SEND_NOTIFICATION, 2, "i'am hiding here..  >.<");
     }
 
     @Override
@@ -437,6 +438,8 @@ public class FloatWindowService extends BaseFloatWindowService
         mShakeListener.stopShakeListen();
         mScreenObserver.stopScreenObserver();
         uiDeal();
+        //maybe useless
+        SimpleLogFile. stopLog();
 //        log.e("onDestory");
     }
 

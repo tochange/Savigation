@@ -25,6 +25,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.RelativeLayout;
 
 import com.tochange.yang.R;
+import com.tochange.yang.lib.SimpleLogFile;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
@@ -114,7 +115,12 @@ public abstract class BaseFloatWindowService extends Service implements
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		instance = this;
+		
+		 SimpleLogFile.captureLogToFile(this, getApplication()
+         .getPackageName());
+		 
+		 
+				instance = this;
 		if (mNotificationManager == null)
 			mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mVibrator = (Vibrator) getApplication().getSystemService(

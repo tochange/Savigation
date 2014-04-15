@@ -52,9 +52,6 @@ public class SectorButtonMainActivity extends Activity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// SimpleLogFile.captureLogToFile(this, getApplication()
-		// .getPackageName());
-
 		instance = this;
 		Utils.setContext(this);
 		setContentView(R.layout.main);
