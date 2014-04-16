@@ -338,10 +338,10 @@ public class SectorButton extends RelativeLayout
         int size = mChildrenList.size();
         if (size > 1)
             angle = Math.PI / 180 * (90 / (size - 1));
-        // log.e("angle=" + angle);
-        // log.e("end=" + end);
-        // log.e("near=" + near);
-        // log.e("far=" + far);
+//         log.e("angle=" + angle);
+//         log.e("end=" + end);
+//         log.e("near=" + near);
+//         log.e("far=" + far);
 
         // i donn't know why 220,it just work well
         Position startPosition = new Position(BASE_POSITION, far - 220);
@@ -716,7 +716,8 @@ public class SectorButton extends RelativeLayout
             {
                 if (!mFatherItem.getIsOpen())
                 {
-                    for (int i = 0; i < mChildrenList.size(); i++)
+                    int size = mChildrenList.size();
+                    for (int i = 0; i < size; i++)
                         mChildrenList.get(i).setVisibility(View.GONE);
                     // mFatherItem.setLayoutParams(getLayoutParams(
                     // mFatherItem.getStartPoint(), mFatherItem));

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.tochange.yang.R;
 
 public class AppUtils {
-	public static final boolean isGorgeousModel                     = true;
+//	public static final boolean isGorgeousModel                     = true;
 	
 	public static final String SCREENSHOT_PATH                      = "/mnt/sdcard/sector";
 	public static final String KEY_PACKAGENAME                      = "packagename";
