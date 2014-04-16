@@ -1,6 +1,7 @@
 package com.tochange.yang.lib;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
@@ -11,12 +12,10 @@ import java.util.List;
 import com.tochange.yang.lib.Utils.FileInfos;
 
 import android.content.Context;
-import android.util.Log;
+import android.os.AsyncTask;
 
 public class SimpleLogFile
 {
-    final static String TAG = "MyLogcatCapture";
-
     final static String LOGPATH = android.os.Environment
             .getExternalStorageDirectory().getAbsolutePath() + "/mydebug";
 
@@ -50,7 +49,7 @@ public class SimpleLogFile
         }
         catch (IOException e)
         {
-            Log.d(TAG, e.toString());
+         log.e(e.toString());
         }
 
         return res;
@@ -58,6 +57,7 @@ public class SimpleLogFile
 
     public static void captureLogToFile(Context context, String packageName)
     {
+        // printBeforPid();
         String appName = packageName
                 .substring(packageName.lastIndexOf(".") + 1);
         File tagFile = new File(LOGCONFIGPATH + "/" + appName);
@@ -66,27 +66,30 @@ public class SimpleLogFile
 
         if (!tagFile.exists())
         {
-            Log.e(TAG, "tag config file:" + tagFile.getAbsolutePath()
+          log.e("tag config file:" + tagFile.getAbsolutePath()
                     + "  not found!");
             return;
         }
         List<String> tagList = new ArrayList<String>();
         if (!getTagListFromFile(LOGCONFIGPATH + "/" + appName, tagList))
         {
-            Log.w(TAG, "get tag config file failed !");
+          log.w("get tag config file failed !");
             return;
         }
         String[] LOGCAT_PREFIX = new String[] { "logcat", "-v", "time", "-s" };
         String[] cmdArray = new String[LOGCAT_PREFIX.length + tagList.size()];
-        for (int i = 0; i < LOGCAT_PREFIX.length; i++)
+        int length = LOGCAT_PREFIX.length;
+        for (int i = 0; i < length; i++)
         {
             cmdArray[i] = LOGCAT_PREFIX[i];
         }
-        for (int j = 0; j < tagList.size(); j++)
+        length = tagList.size();
+        for (int j = 0; j < length; j++)
         {
             cmdArray[LOGCAT_PREFIX.length + j] = tagList.get(j);
         }
         String logCmd = "";
+        length = cmdArray.length;
         for (int k = 0; k < cmdArray.length; k++)
         {
             logCmd = logCmd + cmdArray[k] + " ";
@@ -99,7 +102,7 @@ public class SimpleLogFile
         String param = logCmd + " -p > " + flog.toString();
         String[] comdline = { "/system/bin/sh", "-c", param };
         String cmd = "pkill logcat";
-        Log.w(TAG, "log cmd : " + param);
+       log.e("log cmd : " + param);
         try
         {
             Process p = Runtime.getRuntime().exec("su");
@@ -123,6 +126,26 @@ public class SimpleLogFile
         {
             e.printStackTrace();
         }
+
+    }
+
+    private static void printBeforPid()
+    {
+        try
+        {
+            Process pp;
+            pp = Runtime.getRuntime().exec("pidof logcat");
+            DataInputStream oss = new DataInputStream(pp.getInputStream());
+            String s = oss.readLine();
+            oss.close();
+            log.e("befor pids:" + s);
+            pp.destroy();
+        }
+        catch (IOException e1)
+        {
+            e1.printStackTrace();
+        }
+
     }
 
     private static void deduceLogFile(String appName)
@@ -135,19 +158,39 @@ public class SimpleLogFile
                 f.file.delete();
 
     }
-    
-    public static void stopLog(){
-        
-        String[] cmd = {"adb logcat -d"};
-        try
+
+    /**
+     * when other apps start logcat,it seems this wonn't kill it(them)
+     */
+    public static void killLogcat()
+    {
+        class StopTask extends AsyncTask
         {
-            Runtime.getRuntime().exec(cmd);
+
+            @Override
+            protected Object doInBackground(Object... params)
+            {
+                try
+                {
+                    Process p = Runtime.getRuntime().exec("pidof logcat");
+                    DataInputStream os = new DataInputStream(p.getInputStream());
+                    String s = os.readLine();//only one line message                    
+                    os.close();
+                    String[] pids = s.split(" ");
+                    for (String pid : pids)
+                    {
+                        log.e("kill logcat process pid:" + pid);
+                        Runtime.getRuntime().exec("kill " + pid);
+                    }
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                return null;
+            }
         }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        new StopTask().execute();
     }
 
 }

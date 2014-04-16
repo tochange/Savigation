@@ -86,7 +86,8 @@ public class SlideMenu extends ViewGroup {
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 		View child;
-		for (int i = 0; i < getChildCount(); i++) {
+		int count = getChildCount();
+		for (int i = 0; i < count; i++) {
 			child = getChildAt(i);
 			child.setFocusable(true);
 			child.setClickable(true);

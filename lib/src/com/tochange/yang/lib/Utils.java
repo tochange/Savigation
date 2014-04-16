@@ -90,11 +90,10 @@ public class Utils
             File[] fileList = f.listFiles();
             getFileInfo(fileList, ret, appName);
         }
-
         Collections.sort(ret, new TimeComparator());
 
-//        for (FileInfos ff : ret)
-//            log.e(ff.file.getAbsolutePath());
+        // for (FileInfos ff : ret)
+        // log.e(ff.file.getAbsolutePath());
         if (ret.size() >= 10)
             return ret.subList(0, ret.size() - 10);
         else
@@ -104,7 +103,8 @@ public class Utils
     public static void getFileInfo(File[] fileList, ArrayList<FileInfos> list,
             String appName)
     {
-        for (int i = 0; i < fileList.length; i++)
+        int length = fileList.length;
+        for (int i = 0; i < length; i++)
         {
             File tmp = fileList[i];
             String path = tmp.getAbsolutePath();
@@ -126,7 +126,7 @@ public class Utils
         }
     }
 
-    static void getFileStat(String path)
+    public static void getFileStat(String path)
     {
         try
         {
@@ -138,7 +138,7 @@ public class Utils
             while (line != null)
             {
                 line = bf.readLine();
-                log.e("line=" + line);
+                log.e("stat:" + line);
             }
         }
         catch (IOException e)
@@ -346,7 +346,8 @@ public class Utils
                 .getRunningServices(30);
         if ((serviceList.size() <= 0))
             return false;
-        for (int i = 0; i < serviceList.size(); i++)
+        int size = serviceList.size();
+        for (int i = 0; i < size; i++)
             if (serviceList.get(i).service.getClassName().equals(className) == true)
                 return true;
         return false;
