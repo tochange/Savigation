@@ -116,10 +116,6 @@ public abstract class BaseFloatWindowService extends Service implements
 	public void onCreate() {
 		super.onCreate();
 		
-		 SimpleLogFile.captureLogToFile(this, getApplication()
-         .getPackageName());
-		 
-		 
 				instance = this;
 		if (mNotificationManager == null)
 			mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

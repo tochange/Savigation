@@ -438,8 +438,7 @@ public class FloatWindowService extends BaseFloatWindowService
         mShakeListener.stopShakeListen();
         mScreenObserver.stopScreenObserver();
         uiDeal();
-        //maybe useless
-        SimpleLogFile. stopLog();
+//        SimpleLogFile. killLogcat();
 //        log.e("onDestory");
     }
 
