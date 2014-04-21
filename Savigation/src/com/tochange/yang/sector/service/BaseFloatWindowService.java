@@ -25,9 +25,8 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.RelativeLayout;
 
 import com.tochange.yang.R;
-import com.tochange.yang.lib.SimpleLogFile;
 import com.tochange.yang.lib.Utils;
-import com.tochange.yang.lib.log;
+//import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.shake.ShakeInterface;
 import com.tochange.yang.sector.shake.ShakeListener;
@@ -39,6 +38,7 @@ import com.tochange.yang.view.SectorButton;
 
 public abstract class BaseFloatWindowService extends Service implements
 		FloatWindowServiceInterface {
+	public Intent mIntent;
 	// sony st18i,and almost top left
 	protected int DEFAULT_DISPLAY_HIGHT = (int) (854 / 4.0);
 
@@ -84,9 +84,9 @@ public abstract class BaseFloatWindowService extends Service implements
 
 	protected Vibrator mVibrator;
 
-	protected Intent mIntent;
-
 	protected List<Item> mChoosedBackClildItemList;
+
+	protected List<List<Item>> mClildItemList;
 
 	protected ArrayList<BackItemInfo> mChoosedBackClildList;
 
@@ -115,8 +115,7 @@ public abstract class BaseFloatWindowService extends Service implements
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
-				instance = this;
+		instance = this;
 		if (mNotificationManager == null)
 			mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mVibrator = (Vibrator) getApplication().getSystemService(
@@ -133,7 +132,7 @@ public abstract class BaseFloatWindowService extends Service implements
 	@Override
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
-		initEnvironment();// mBackPanelBin = new BackPanelBin(this);
+		initEnvironment();
 		mIntent = intent;
 		setLayoutParamsWidthAndHight(mLayoutParams);
 		setLayoutParameter(mLayoutParams);
@@ -207,20 +206,34 @@ public abstract class BaseFloatWindowService extends Service implements
 	private void getAndSetSectorButton() {
 		mSectorButton = (SectorButton) mFloatLayout.findViewById(R.id.sector);
 		mFatherItem = mSectorButton.getFatherItem();
-		mSectorButton.initData(initChildrenItemList());
+
+		int value = intentNotReOpen() ? mIntent.getIntExtra(
+				AppUtils.KEY_BACKPANEL_VALUES, -1) : mSharedPreferences.getInt(
+				AppUtils.KEY_BACKPANEL_VALUES, -1);
+		mChoosedBackClildItemList = getBackChildListByValue(value);
+
+		mClildItemList = new ArrayList<List<Item>>();
+		mClildItemList.add(AppUtils.ENUM_CHILDORDER.app.ordinal(),
+				getAppItemList());
+		mClildItemList.add(AppUtils.ENUM_CHILDORDER.back.ordinal(),
+				mChoosedBackClildItemList);
+
+		mSectorButton.initData(mClildItemList);
 		mEvilMarginTop = mSectorButton.getEvilMarginTop();
 		// mLayoutParams.dimAmount = 0.6f;
 		mSectorButton.setLinster(getChildrenLinster());
 	}
 
-	private List<List<Item>> initChildrenItemList() {
-		List<List<Item>> ret = new ArrayList<List<Item>>();
+	private boolean intentNotReOpen() {
+		return (mIntent != null && !mIntent.getBooleanExtra(
+				AppUtils.KEY_ISREOPEN, false));
+	}
+
+	private List<Item> getAppItemList() {
 		List<Item> appItemList = new ArrayList<Item>();
 		int value, size;
-		if (mIntent != null
-				&& !mIntent.getBooleanExtra(AppUtils.KEY_ISREOPEN, false)) {
+		if (intentNotReOpen()) {
 			size = mIntent.getIntExtra(AppUtils.KEY_SIZE, -1);
-			value = mIntent.getIntExtra(AppUtils.KEY_BACKPANEL_VALUES, -1);
 			for (int i = 0; i < size; i++) {
 				addImageStringToChildList(
 						mIntent.getStringExtra(AppUtils.KEY_IMAGESTRING + i),
@@ -246,12 +259,7 @@ public abstract class BaseFloatWindowService extends Service implements
 								+ i, "default packgename"));
 			}
 		}
-//		log.e("value=" + value);
-		mChoosedBackClildItemList = getBackChildListByValue(value);
-		ret.add(appItemList);// pay attention to the order
-		ret.add(mChoosedBackClildItemList);
-
-		return ret;
+		return appItemList;
 	}
 
 	private List<Item> getBackChildListByValue(int value) {
@@ -274,31 +282,6 @@ public abstract class BaseFloatWindowService extends Service implements
 			}
 		}
 		return resultList;
-	}
-
-	private void addIntentFilterAction(IntentFilter filter, int value) {
-		switch (value) {
-		case AppUtils.SECONDPANELKEY_WIFI:
-			filter.addAction(android.net.wifi.WifiManager.WIFI_STATE_CHANGED_ACTION);
-			break;
-		case AppUtils.SECONDPANELKEY_BLUETOOTH:
-			filter.addAction(android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED);
-			break;
-		case AppUtils.SECONDPANELKEY_GPS:
-			break;
-		case AppUtils.SECONDPANELKEY_BRIGHTNESS:
-			break;
-		case AppUtils.SECONDPANELKEY_RING:
-			filter.addAction(android.media.AudioManager.RINGER_MODE_CHANGED_ACTION);
-			break;
-		case AppUtils.SECONDPANELKEY_AIRPLANMODE:
-			filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-			break;
-		case AppUtils.SECONDPANELKEY_GPRS:
-			filter.addAction(android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED);
-		default:
-		}
-
 	}
 
 	private void addImageStringToChildList(String imageString,

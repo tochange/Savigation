@@ -12,7 +12,7 @@
         <activity
             android:name=".SectorButtonMainActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
-            <intent-filter>
+            <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -27,8 +27,13 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
 
-        <receiver android:name=".screenobserver.ScreenUnlockReceiver" >
-            <intent-filter android:priority="90000" >
+        <receiver android:name=".screenobserver.StaticBroadcastReceiver" >
+            <intent-filter >
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+
+                <data android:scheme="package" />
+            </intent-filter>
+            <intent-filter >
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>

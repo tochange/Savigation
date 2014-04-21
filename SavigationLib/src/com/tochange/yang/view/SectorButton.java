@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
+import com.tochange.yang.sector.tools.AppUtils;
 
 public class SectorButton extends RelativeLayout
 {
@@ -40,11 +41,7 @@ public class SectorButton extends RelativeLayout
 
     private final int CHILD_WIDTH = 65;// 58 // 65
 
-    // private final int CHILD_WIDTH = 58;// 58 // 65
-
     private final int FATHER_WIDTH = 85;// 65 // 85
-
-    // private final int FATHER_WIDTH = 65;// 65 // 85
 
     private int ALL_TIME;
 
@@ -53,12 +50,12 @@ public class SectorButton extends RelativeLayout
     private final float RADIUS_SCALE = 1.3f;
 
     // (no so big,0-3 will be good)
-    private static final int CHILD_ENLARGE_SCALE = 2;
+    private  final int CHILD_ENLARGE_SCALE = 2;
 
-    private static final short BASE_POSITION = 10;
+    private  final short BASE_POSITION = 10;
 
     // max number depend on physic screen size( < min(width,hight))
-    private static final int MENU_HIGHT = 225;
+    private  final int MENU_HIGHT = 225;
 
     private List<List<Item>> mAllChildrenList;
 
@@ -96,7 +93,6 @@ public class SectorButton extends RelativeLayout
         mContext = context;
 
         mChildrenList = new ArrayList<Item>();
-        // mBackupChildrenList = new ArrayList<Item>();
         // mSoundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 5);
         mAudioManager = (AudioManager) mContext
                 .getSystemService(Context.AUDIO_SERVICE);
@@ -147,17 +143,12 @@ public class SectorButton extends RelativeLayout
     public Item getFatherItem()
     {
         Item fatherItem = new Item(mContext, null);
+//        fatherItem.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.composer_father_l));
+//        fatherItem.setImageResource(R.drawable.composer_father_l);
         fatherItem.setBackgroundResource(R.drawable.composer_father_l);
         mFatherItem = fatherItem;
         return mFatherItem;
     }
-
-    // public void updateBackPanelChild(List<Item> backchild)
-    // {
-    // mNeedUpdateBackChild = true;
-    // // mUpdateBackChild = backchild;
-    //
-    // }
 
     public void updateBackPanelChild()
     {
@@ -190,13 +181,10 @@ public class SectorButton extends RelativeLayout
             if (mIsback)
                 mChildrenLinster.updateBackChildList();
 
-            // i donn't know why 318,it just work well
-            lp.width = 318;
-            lp.height = 318;
+            // i donn't know why 1.345,it just work well
+            lp.width = lp.height = (int)(FAR * 1.345);
             setLayoutParams(lp);
             expendAnim();
-            // mHandler.postDelayed(new MyRunnable(OPEN_HANDLE_NUM, mHandler),
-            // ALL_TIME - DELAYED_TIME + 1000);
         }
         else
             closedAnim();
@@ -243,13 +231,13 @@ public class SectorButton extends RelativeLayout
         mChildrenList.clear();
         if (mIsback)
         {
-            mChildrenList.addAll(mAllChildrenList.get(1));
-            addAllItems(mAllChildrenList.get(1));
+            mChildrenList.addAll(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.back.ordinal()));
+            addAllItems(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.back.ordinal()));
         }
         else
         {// app data load first(in app project),then shortcut data in back side
-            mChildrenList.addAll(mAllChildrenList.get(0));
-            addAllItems(mAllChildrenList.get(0));// default load app
+            mChildrenList.addAll(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.app.ordinal()));
+            addAllItems(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.app.ordinal()));// default load app
         }
     }
 
@@ -316,6 +304,8 @@ public class SectorButton extends RelativeLayout
         }
     };
 
+    private int FAR;
+
     private void addAllItems(List<Item> childList)
     {
         if (childList.isEmpty())
@@ -334,6 +324,7 @@ public class SectorButton extends RelativeLayout
         // divide into 11 parts
         int end = far / 11 * 10;
         int near = far / 11 * 9;
+        FAR = far;
         double angle = 0;
         int size = mChildrenList.size();
         if (size > 1)
@@ -449,10 +440,7 @@ public class SectorButton extends RelativeLayout
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         // result.topMargin = position.y;
         if (position.y > mEvilMarginTop)
-        {
-            // log.e("giving evil count..");
             mEvilMarginTop = position.y;
-        }
 
         result.leftMargin = position.x;
         return result;

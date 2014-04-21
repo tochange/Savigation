@@ -10,6 +10,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.location.LocationManager;
@@ -57,6 +58,32 @@ public class BackPanelBin {
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 	}
 
+    private void addIntentFilterAction(IntentFilter filter, int value)
+    {
+        switch (value)
+        {
+            case AppUtils.SECONDPANELKEY_WIFI:
+                filter.addAction(android.net.wifi.WifiManager.WIFI_STATE_CHANGED_ACTION);
+                break;
+            case AppUtils.SECONDPANELKEY_BLUETOOTH:
+                filter.addAction(android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED);
+                break;
+            case AppUtils.SECONDPANELKEY_GPS:
+                break;
+            case AppUtils.SECONDPANELKEY_BRIGHTNESS:
+                break;
+            case AppUtils.SECONDPANELKEY_RING:
+                filter.addAction(android.media.AudioManager.RINGER_MODE_CHANGED_ACTION);
+                break;
+            case AppUtils.SECONDPANELKEY_AIRPLANMODE:
+                filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+                break;
+            case AppUtils.SECONDPANELKEY_GPRS:
+                filter.addAction(android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED);
+            default:
+        }
+
+    }
 	public void openToolByType(int type){
 		// log.e("type =" + type);
 		// index = 128;

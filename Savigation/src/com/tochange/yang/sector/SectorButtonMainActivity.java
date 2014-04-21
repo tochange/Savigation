@@ -43,7 +43,6 @@ public class SectorButtonMainActivity extends Activity implements
 
     private SlideMenu slideMenu;
 
-    public static SectorButtonMainActivity instance;
 
     private ArrayList<AppData> mCheckAppList = new ArrayList<AppData>();
 
@@ -57,7 +56,6 @@ public class SectorButtonMainActivity extends Activity implements
         SimpleLogFile.killLogcat();
         SimpleLogFile.captureLogToFile(this, getApplication().getPackageName());
 
-        instance = this;
         Utils.setContext(this);
         setContentView(R.layout.main);
         findView();
@@ -160,7 +158,7 @@ public class SectorButtonMainActivity extends Activity implements
         protected void onPostExecute(String result)
         {
             finish();
-            Utils.closeFZProgressBar(FZProgressBar);
+            Utils.closeFZProgressBar(FZProgressBar);//have to?
         }
 
     }
