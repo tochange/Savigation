@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import com.tochange.yang.R;
 
 public class AppUtils {
-//	public static final boolean isGorgeousModel                     = true;
-	
 	public static final String SCREENSHOT_PATH                      = "/mnt/sdcard/sector";
 	public static final String KEY_PACKAGENAME                      = "packagename";
 	public static final String KEY_IMAGESTRING                      = "imagestring";
@@ -31,6 +29,8 @@ public class AppUtils {
 	public static final int SECONDPANELKEY_FLASHLIGHT               = 1 << 7;
 	public static final int SECONDPANELKEY_SCREENORIENTATION        = 1 << 8;
 	public static final int SECONDPANELKEY_SCREENSHOT               = 1 << 9;
+	
+	public static enum ENUM_CHILDORDER{app, back};
 
 	public static ArrayList<BackItemInfo> getBackPanelDataList(ArrayList<BackItemInfo> backList){
 	       if (backList == null)
