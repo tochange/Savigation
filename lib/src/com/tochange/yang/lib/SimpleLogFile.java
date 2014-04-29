@@ -49,7 +49,7 @@ public class SimpleLogFile
         }
         catch (IOException e)
         {
-         log.e(e.toString());
+            log.e(e.toString());
         }
 
         return res;
@@ -66,14 +66,14 @@ public class SimpleLogFile
 
         if (!tagFile.exists())
         {
-          log.e("tag config file:" + tagFile.getAbsolutePath()
+            log.e("tag config file:" + tagFile.getAbsolutePath()
                     + "  not found!");
             return;
         }
         List<String> tagList = new ArrayList<String>();
         if (!getTagListFromFile(LOGCONFIGPATH + "/" + appName, tagList))
         {
-          log.w("get tag config file failed !");
+            log.w("get tag config file failed !");
             return;
         }
         String[] LOGCAT_PREFIX = new String[] { "logcat", "-v", "time", "-s" };
@@ -102,7 +102,7 @@ public class SimpleLogFile
         String param = logCmd + " -p > " + flog.toString();
         String[] comdline = { "/system/bin/sh", "-c", param };
         String cmd = "pkill logcat";
-       log.e("log cmd : " + param);
+        log.e("log cmd : " + param);
         try
         {
             Process p = Runtime.getRuntime().exec("su");
@@ -174,13 +174,16 @@ public class SimpleLogFile
                 {
                     Process p = Runtime.getRuntime().exec("pidof logcat");
                     DataInputStream os = new DataInputStream(p.getInputStream());
-                    String s = os.readLine();//only one line message                    
+                    String s = os.readLine();// only one line message
                     os.close();
-                    String[] pids = s.split(" ");
-                    for (String pid : pids)
+                    if (s != null && !s.equals(""))
                     {
-                        log.e("kill logcat process pid:" + pid);
-                        Runtime.getRuntime().exec("kill " + pid);
+                        String[] pids = s.split(" ");
+                        for (String pid : pids)
+                        {
+                            log.e("kill logcat process pid:" + pid);
+                            Runtime.getRuntime().exec("kill " + pid);
+                        }
                     }
                 }
                 catch (IOException e)
@@ -192,5 +195,4 @@ public class SimpleLogFile
         }
         new StopTask().execute();
     }
-
 }

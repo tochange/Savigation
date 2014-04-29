@@ -523,13 +523,9 @@ public class Utils
             drawable.draw(canvas);
             int size = bitmap.getWidth() * bitmap.getHeight() * 4;
 
-            // 鍒涘缓涓�釜瀛楄妭鏁扮粍杈撳嚭娴�娴佺殑澶у皬涓簊ize
             ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
-            // 璁剧疆浣嶅浘鐨勫帇缂╂牸寮忥紝璐ㄩ噺涓�00%锛屽苟鏀惧叆瀛楄妭鏁扮粍杈撳嚭娴佷腑
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-            // 灏嗗瓧鑺傛暟缁勮緭鍑烘祦杞寲涓哄瓧鑺傛暟缁刡yte[]
             byte[] imagedata = baos.toByteArray();
-
             String icon = Base64.encodeToString(imagedata, Base64.DEFAULT);
             return icon;
         }
@@ -558,14 +554,12 @@ public class Utils
 
     }
 
-    // 浠庤祫婧愪腑鑾峰彇Bitmap
     public static Bitmap getBitmapFromResources(Activity act, int resId)
     {
         Resources res = act.getResources();
         return BitmapFactory.decodeResource(res, resId);
     }
 
-    // byte[] 鈫�Bitmap
     public static Bitmap convertBytes2Bimap(byte[] b)
     {
         if (b.length == 0)
@@ -575,7 +569,6 @@ public class Utils
         return BitmapFactory.decodeByteArray(b, 0, b.length);
     }
 
-    // Bitmap 鈫�byte[]
     public static byte[] convertBitmap2Bytes(Bitmap bm)
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -597,11 +590,9 @@ public class Utils
         return bd.getBitmap();
     }
 
-    // Bitmap 鈫�Drawable
     public static Drawable convertBitmap2Drawable(Bitmap bitmap)
     {
         BitmapDrawable bd = new BitmapDrawable(bitmap);
-        // 鍥犱负BtimapDrawable鏄疍rawable鐨勫瓙绫伙紝鏈�粓鐩存帴浣跨敤bd瀵硅薄鍗冲彲銆�
         return bd;
     }
 
@@ -622,7 +613,6 @@ public class Utils
         return bitmap;
     }
 
-    /*************************** 鍥剧墖鍦嗚澶勭悊 ********************************/
     public static Bitmap getRCB(Bitmap bitmap, float roundPX)
     {
         Bitmap dstbmp = Bitmap.createBitmap(bitmap.getWidth(),
