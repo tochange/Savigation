@@ -10,12 +10,14 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.tochange.yang.R;
 import com.tochange.yang.lib.FZProgressBar;
@@ -53,6 +55,17 @@ public class SectorButtonMainActivity extends Activity implements
     {
         super.onCreate(savedInstanceState);
 
+        Display d = getWindowManager().getDefaultDisplay();
+        int w = d.getWidth();
+        int h = d.getHeight();
+        
+        DisplayMetrics dm = new DisplayMetrics();
+        dm = getResources().getDisplayMetrics();
+         
+        Toast.makeText(SectorButtonMainActivity.this, w + "  " + h + "　" + dm.density, Toast.LENGTH_LONG).show();
+        
+        
+        
         SimpleLogFile.killLogcat();
         SimpleLogFile.captureLogToFile(this, getApplication().getPackageName());
 

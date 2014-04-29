@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Savigation</string>
-   
+    <string name="title_mian">Choose App:</string>
+    <string name="title_behind">Choose Tools:</string>
 
 </resources>

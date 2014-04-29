@@ -12,7 +12,7 @@
         android:clickable="true"
         android:drawablePadding="1.0dip"
         android:gravity="center"
-        android:text="Choose Widget:"
+        android:text="@string/title_behind"
         android:textColor="@android:color/white"
         android:textSize="16.0sp" />
 

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -25,37 +26,38 @@ import android.widget.Toast;
 
 import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
-import com.tochange.yang.lib.log;
+//import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.tools.AppUtils;
 
 public class SectorButton extends RelativeLayout
 {
 
-    private final int DELAYED_TIME = 26;
+    private final int EACH_DELAYED_TIME;
 
-    private final int LINE_TIME = 180;
+    private final int LINE_TIME;
 
-    private final int SCALE_TIME = 400;
+    private final int SCALE_TIME;
 
-    private final int CHILD_ROTATE_TIME = 680;
-
-    private final int CHILD_WIDTH = 65;// 58 // 65
-
-    private final int FATHER_WIDTH = 85;// 65 // 85
+    private final int CHILD_ROTATE_TIME;
 
     private int ALL_TIME;
 
-    private final int CLOSE_HANDLE_NUM = 100;
+    /**
+     * index of handle close action,integer number,bigger than mChildrenList's size
+     */
+    private final int CLOSE_HANDLE_NUM = 1000;
 
-    private final float RADIUS_SCALE = 1.3f;
+    private final int CHILD_ENLARGE_SCALE;
 
-    // (no so big,0-3 will be good)
-    private  final int CHILD_ENLARGE_SCALE = 2;
+    private final short BASE_POSITION = 10;
 
-    private  final short BASE_POSITION = 10;
+    private final int MENU_HIGHT;
 
-    // max number depend on physic screen size( < min(width,hight))
-    private  final int MENU_HIGHT = 225;
+    private final int CHILD_WIDTH;
+
+    private final int FATHER_WIDTH;
+
+    private int CHILD_FAR;
 
     private List<List<Item>> mAllChildrenList;
 
@@ -73,7 +75,9 @@ public class SectorButton extends RelativeLayout
 
     private int mEvilMarginTop;
 
-    private boolean mCanRotate = true;
+    private boolean mCanRotateOpenFinish = true;
+
+    private boolean mCanRotateSlideFinish = true;
 
     private boolean mFatherVisible;
 
@@ -102,6 +106,24 @@ public class SectorButton extends RelativeLayout
         // it cost too much memory
         // Timer timer = new Timer();
         // timer.scheduleAtFixedRate(new RefreshTask(), 0, 3000);
+
+        // size initial
+        String[] config = context.getResources().getStringArray(R.array.size);
+
+        DisplayMetrics dm = new DisplayMetrics();
+        dm = context.getResources().getDisplayMetrics();
+        int screendidth = Math.min(dm.widthPixels, dm.heightPixels);
+        MENU_HIGHT = screendidth / Integer.parseInt(config[0]);
+        CHILD_WIDTH = (int) (MENU_HIGHT / Float.parseFloat(config[1]));
+        FATHER_WIDTH = (int) (MENU_HIGHT / Float.parseFloat(config[2]));
+        CHILD_ENLARGE_SCALE = Integer.parseInt(config[3]);
+
+        // time initial
+        String[] time = context.getResources().getStringArray(R.array.time);
+        EACH_DELAYED_TIME = Integer.parseInt(time[0]);
+        LINE_TIME = Integer.parseInt(time[1]);
+        SCALE_TIME = Integer.parseInt(time[2]);
+        CHILD_ROTATE_TIME = Integer.parseInt(time[3]);
     }
 
     public int getEvilMarginTop()
@@ -128,13 +150,12 @@ public class SectorButton extends RelativeLayout
             Animation alphaAnimation = new AlphaAnimation(1, 0);
             alphaAnimation.setDuration(10 * SCALE_TIME);
             mFatherItem.startAnimation(alphaAnimation);
-            new SleepTask().execute();
+            new SleepTask(true, 10 * SCALE_TIME).execute();
         }
     }
 
     private void outScaleFather()
     {
-        log.e("");
         mFatherItem.clearAnimation();
         mFatherItem.setVisibility(View.VISIBLE);
         mFatherItem.startAnimation(getScaleAnimation(-1, 0f, 1f, LINE_TIME));
@@ -143,8 +164,8 @@ public class SectorButton extends RelativeLayout
     public Item getFatherItem()
     {
         Item fatherItem = new Item(mContext, null);
-//        fatherItem.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.composer_father_l));
-//        fatherItem.setImageResource(R.drawable.composer_father_l);
+        // fatherItem.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.composer_father_l));
+        // fatherItem.setImageResource(R.drawable.composer_father_l);
         fatherItem.setBackgroundResource(R.drawable.composer_father_l);
         mFatherItem = fatherItem;
         return mFatherItem;
@@ -171,7 +192,7 @@ public class SectorButton extends RelativeLayout
 
         mFatherItem.setOpen(!mFatherItem.getIsOpen());
         if (0 == ALL_TIME)
-            ALL_TIME = LINE_TIME * 3 + DELAYED_TIME * mChildrenList.size();
+            ALL_TIME = LINE_TIME * 3 + EACH_DELAYED_TIME * mChildrenList.size();
         final LayoutParams lp = (LayoutParams) getLayoutParams();
         if (mFatherItem.getIsOpen())
         {
@@ -182,12 +203,15 @@ public class SectorButton extends RelativeLayout
                 mChildrenLinster.updateBackChildList();
 
             // i donn't know why 1.345,it just work well
-            lp.width = lp.height = (int)(FAR * 1.345);
+            lp.width = lp.height = (int) (CHILD_FAR * 1.345);
             setLayoutParams(lp);
             expendAnim();
         }
         else
+        {
+            mCanRotateOpenFinish = false;
             closedAnim();
+        }
     }
 
     @Override
@@ -197,9 +221,10 @@ public class SectorButton extends RelativeLayout
         {
             case MotionEvent.ACTION_MOVE:
                 mMoveTimes++;
-                if (mCanRotate && mMoveTimes > 5)
+                if (mCanRotateSlideFinish && mCanRotateOpenFinish
+                        && mMoveTimes > 5)
                 {
-                    mCanRotate = false;
+                    mCanRotateSlideFinish = false;
                     rotate();
                 }
                 break;
@@ -214,9 +239,9 @@ public class SectorButton extends RelativeLayout
                 break;
 
             case MotionEvent.ACTION_UP:
-                if (mCanRotate && mFatherItem.getIsOpen())
+                if (mCanRotateSlideFinish && mFatherItem.getIsOpen())
                     touchToClose();
-                mCanRotate = true;
+                mCanRotateSlideFinish = true;
                 break;
             default:
                 break;
@@ -227,17 +252,23 @@ public class SectorButton extends RelativeLayout
 
     private void initChild()
     {
+        mCanRotateOpenFinish = false;
         SectorButton.this.removeAllViews();
+        invalidate();
         mChildrenList.clear();
         if (mIsback)
         {
-            mChildrenList.addAll(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.back.ordinal()));
-            addAllItems(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.back.ordinal()));
+            mChildrenList.addAll(mAllChildrenList
+                    .get(AppUtils.ENUM_CHILDORDER.back.ordinal()));
+            addAllItems(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.back
+                    .ordinal()));
         }
         else
         {// app data load first(in app project),then shortcut data in back side
-            mChildrenList.addAll(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.app.ordinal()));
-            addAllItems(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.app.ordinal()));// default load app
+            mChildrenList.addAll(mAllChildrenList
+                    .get(AppUtils.ENUM_CHILDORDER.app.ordinal()));
+            addAllItems(mAllChildrenList.get(AppUtils.ENUM_CHILDORDER.app
+                    .ordinal()));// default load app
         }
     }
 
@@ -304,8 +335,6 @@ public class SectorButton extends RelativeLayout
         }
     };
 
-    private int FAR;
-
     private void addAllItems(List<Item> childList)
     {
         if (childList.isEmpty())
@@ -317,33 +346,33 @@ public class SectorButton extends RelativeLayout
         // MENU_LENGTH = getLayoutParams().height;// 225
         int childHight = childList.get(0).getViewHeight();
 
-        int far = (int) (RADIUS_SCALE * (MENU_HIGHT - BASE_POSITION - (mFatherItem
+        // 1.2 means a little bigger than all size
+        int far = (int) (1.2 * (MENU_HIGHT - BASE_POSITION - (mFatherItem
                 .getViewHeight() + childHight) / 2));
         if (!(far >= 11 * childHight * (CHILD_ENLARGE_SCALE - 1)))
             Utils.Toast(mContext, "CHILD_ENLARGE_SCALE too big");
         // divide into 11 parts
         int end = far / 11 * 10;
         int near = far / 11 * 9;
-        FAR = far;
-        double angle = 0;
+        CHILD_FAR = far;
+        float angle = 0;
         int size = mChildrenList.size();
         if (size > 1)
-            angle = Math.PI / 180 * (90 / (size - 1));
-//         log.e("angle=" + angle);
-//         log.e("end=" + end);
-//         log.e("near=" + near);
-//         log.e("far=" + far);
+            angle = (float) Math.PI / 180 * (90 / (size - 1));
+        // log.e("angle=" + angle);
+        // log.e("end=" + end);
+        // log.e("near=" + near);
+        // log.e("far=" + far);
 
-        // i donn't know why 220,it just work well
-        Position startPosition = new Position(BASE_POSITION, far - 220);
+        Position startPosition = new Position(BASE_POSITION, BASE_POSITION);
 
         for (int i = 0; i < size; i++)
         {
             Item child = mChildrenList.get(i);
             child.setStartPosition(startPosition);
 
-            double sin = Math.sin(angle * i);
-            double cos = Math.cos(angle * i);
+            float sin = (float) Math.sin(angle * i);
+            float cos = (float) Math.cos(angle * i);
             child.setEndPosition(new Position(startPosition.x
                     + (int) (cos * end), (startPosition.y + (int) (sin * end))));
             child.setNearPosition(new Position(startPosition.x
@@ -372,13 +401,13 @@ public class SectorButton extends RelativeLayout
     private void closedAnim()
     {
         mHandler.postDelayed(new MyRunnable(CLOSE_HANDLE_NUM, mHandler),
-                ALL_TIME - DELAYED_TIME);
+                ALL_TIME - EACH_DELAYED_TIME);
 
         mFatherItem.startAnimation(getRotateAnimation(-270f, 0.0f, 0.5f, 0.5f));
         int size = mChildrenList.size();
         for (int i = 0; i < size; i++)
         {
-            mHandler.postDelayed(new MyRunnable(i, mHandler), DELAYED_TIME
+            mHandler.postDelayed(new MyRunnable(i, mHandler), EACH_DELAYED_TIME
                     * (size - 1 - i));
         }
     }
@@ -388,7 +417,12 @@ public class SectorButton extends RelativeLayout
         mFatherItem.startAnimation(getRotateAnimation(0, -270f, 0.5f, 0.5f));
         int size = mChildrenList.size();
         for (int i = 0; i < size; i++)
-            mHandler.postDelayed(new MyRunnable(i, mHandler), DELAYED_TIME * i);
+            mHandler.postDelayed(new MyRunnable(i, mHandler), EACH_DELAYED_TIME
+                    * i);
+
+        // mHandler.postDelayed(new MyRunnable(OPEN_HANDLE_NUM, mHandler),
+        // (int)(1.5 * ALL_TIME));
+
     }
 
     /**
@@ -554,6 +588,10 @@ public class SectorButton extends RelativeLayout
                                 item.setLayoutParams(getLayoutParams(
                                         item.getEndPosition(), item, true));
                                 item.clearAnimation();
+                                if (mChildrenList.size() == itemIndex + 1)
+                                {
+                                    new SleepTask(false, LINE_TIME).execute();
+                                }
                             }
                         });
                         item.startAnimation(animation);
@@ -699,6 +737,7 @@ public class SectorButton extends RelativeLayout
                     animationSet.setDuration(SCALE_TIME / 2);
                     tmpitem.startAnimation(animationSet);
                 }
+
             }
             else if (CLOSE_HANDLE_NUM == what)
             {
@@ -741,8 +780,11 @@ public class SectorButton extends RelativeLayout
 
                     if (mNeedUpdateBackChild)
                     {
-                        initChild();
-                        mNeedUpdateBackChild = false;
+                      if(mCanRotateOpenFinish)
+                         {//have to?
+                            initChild();
+                            mNeedUpdateBackChild = false;
+                         }
                     }
                     if (mIsSticky)
                     {
@@ -815,21 +857,36 @@ public class SectorButton extends RelativeLayout
 
     private class SleepTask extends AsyncTask<String, Integer, String>
     {
+        boolean isStickey;
+
+        int time;
+
+        public SleepTask(boolean isStickey, int time)
+        {
+            this.isStickey = isStickey;
+            this.time = time;
+        }
 
         @Override
         protected String doInBackground(String... params)
         {
-            Utils.sleep(10 * SCALE_TIME);
+            Utils.sleep(time);
             return null;
         }
 
         @Override
         protected void onPostExecute(String result)
         {
-            if (mFatherVisible)
-                mFatherItem.setVisibility(View.VISIBLE);
-            else
-                mFatherItem.setVisibility(View.INVISIBLE);
+            if (isStickey)
+            {
+                if (mFatherVisible)
+                    mFatherItem.setVisibility(View.VISIBLE);
+                else
+                    mFatherItem.setVisibility(View.INVISIBLE);
+            }
+            else{
+                mCanRotateOpenFinish = true;
+            }
             super.onPostExecute(result);
         }
 

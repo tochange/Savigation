@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="size">
+        <item>2</item><!--scale to all length,all length depend on physic screen size( < min(width,hight))-->
+        <item>3.46</item><!--scale to all,child -->
+        <item>2.647</item><!--scale to all,father,a little bigger than child -->
+        <item>2</item><!--scale to self,child,(no so big,0-3 will be good) -->
+    </string-array>
+    
+    <string-array name ="time">
+        <item>26</item><!--each child delay time,millisecond -->
+        <item>180</item><!--line moving-->
+        <item>400</item><!--scale -->
+        <item>680</item><!--child rotate -->
+            
+    </string-array>
+
+</resources>

@@ -12,8 +12,8 @@
 
     <stroke
         android:width="1px"
-        android:color="#ccffff" />
+        android:color="#55ccffff" />
 
-    <corners android:radius="42px" />
+    <corners android:radius="@dimen/border_cornerradius" />
 
 </shape>

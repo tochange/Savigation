@@ -12,7 +12,7 @@
         android:src="@drawable/ic_top_bar_category" />
 
     <TextView
-        android:layout_width="1dp"
+        android:layout_width="1px"
         android:layout_height="fill_parent"
         android:layout_toRightOf="@id/title_bar_menu_btn"
         android:background="#5ca7ba" />
@@ -25,7 +25,7 @@
         android:ellipsize="end"
         android:gravity="center"
         android:singleLine="true"
-        android:text="Choose App："
+        android:text="@string/title_mian"
         android:textColor="#ffffff"
         android:textSize="18sp" />
 
