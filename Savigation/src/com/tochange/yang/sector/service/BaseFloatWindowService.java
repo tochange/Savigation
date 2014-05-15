@@ -38,6 +38,7 @@ import com.tochange.yang.view.SectorButton;
 
 public abstract class BaseFloatWindowService extends Service implements
 		FloatWindowServiceInterface {
+    public static boolean mAlreadyDestory;
 	public Intent mIntent;
 	// sony st18i,and almost top left
 	protected int DEFAULT_DISPLAY_HIGHT = (int) (854 / 4.0);
@@ -62,8 +63,6 @@ public abstract class BaseFloatWindowService extends Service implements
 	protected boolean mIsSticky;
 
 	protected boolean mIsMoving;
-
-	protected boolean mAlreadyDestory;
 
 	protected int mSleepTime = 10;
 
