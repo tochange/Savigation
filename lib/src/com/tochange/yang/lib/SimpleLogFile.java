@@ -57,6 +57,7 @@ public class SimpleLogFile
 
     public static void captureLogToFile(Context context, String packageName)
     {
+        killLogcat();
         // printBeforPid();
         String appName = packageName
                 .substring(packageName.lastIndexOf(".") + 1);
@@ -105,7 +106,8 @@ public class SimpleLogFile
         log.e("log cmd : " + param);
         try
         {
-            Process p = Runtime.getRuntime().exec("su");
+            Process p = Runtime.getRuntime().exec("sh");// in my company's pad
+                                                        // sh is ok
             DataOutputStream os = new DataOutputStream(p.getOutputStream());
             os.write(cmd.getBytes());
             os.flush();
@@ -118,13 +120,13 @@ public class SimpleLogFile
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                log.e(e.toString());
             }
             Runtime.getRuntime().exec(comdline);
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            log.e(e.toString());
         }
 
     }
@@ -134,16 +136,16 @@ public class SimpleLogFile
         try
         {
             Process pp;
-            pp = Runtime.getRuntime().exec("pidof logcat");
+            pp = Runtime.getRuntime().exec("sh pidof logcat");
             DataInputStream oss = new DataInputStream(pp.getInputStream());
             String s = oss.readLine();
             oss.close();
             log.e("befor pids:" + s);
             pp.destroy();
         }
-        catch (IOException e1)
+        catch (IOException e)
         {
-            e1.printStackTrace();
+            log.e(e.toString());
         }
 
     }
@@ -162,37 +164,28 @@ public class SimpleLogFile
     /**
      * when other apps start logcat,it seems this wonn't kill it(them)
      */
-    public static void killLogcat()
+    private static void killLogcat()
     {
-        class StopTask extends AsyncTask
+        try
         {
-
-            @Override
-            protected Object doInBackground(Object... params)
+            Process p = Runtime.getRuntime().exec("sh pidof logcat");
+            DataInputStream os = new DataInputStream(p.getInputStream());
+            String s = os.readLine();// only one line message
+            os.close();
+            if (s != null && !s.equals(""))
             {
-                try
+                String[] pids = s.split(" ");
+                for (String pid : pids)
                 {
-                    Process p = Runtime.getRuntime().exec("pidof logcat");
-                    DataInputStream os = new DataInputStream(p.getInputStream());
-                    String s = os.readLine();// only one line message
-                    os.close();
-                    if (s != null && !s.equals(""))
-                    {
-                        String[] pids = s.split(" ");
-                        for (String pid : pids)
-                        {
-                            log.e("kill logcat process pid:" + pid);
-                            Runtime.getRuntime().exec("kill " + pid);
-                        }
-                    }
+                    log.e("kill logcat process pid:" + pid);
+                    Runtime.getRuntime().exec("kill " + pid);
                 }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-                return null;
             }
         }
-        new StopTask().execute();
+        catch (IOException e)
+        {
+            log.e(e.toString());
+        }
+        log.e("");
     }
 }
