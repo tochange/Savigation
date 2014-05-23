@@ -16,9 +16,8 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-import com.tochange.yang.lib.Utils;
+import com.tochange.yang.R;
 import com.tochange.yang.lib.log;
-import com.tochange.yang.sector.SectorButtonMainActivity;
 import com.tochange.yang.sector.service.BaseFloatWindowService;
 import com.tochange.yang.sector.service.FloatWindowService;
 import com.tochange.yang.sector.tools.AppUtils;
@@ -152,17 +151,34 @@ public class StaticBroadcastReceiver extends BroadcastReceiver
     private void showLocation(String num)
     {
         if (CopyDatToFiles(mContext))
-        {// only one time,string is ok,not string buffer
+        {
             String location = GetLocationByNumber.getCallerInfo(num, mContext);
-            if (num.matches("^(130|131|132|145|155|156|185|186).*$"))
-                location += "-联通";
-            else if (num.matches("^(133|153|1349|177|1700|180|181|189).*$"))
-                location += "-电信";
-            else if (num
-                    .matches("^(1340|1341|1342|1343|1344|1345|1346|1347|1348|135|136|137|138|139|147|150|151|152|157|158|159|182|183|187|188).*$"))
-                location += "-移动";
+            location = appendOperator(num, location);
             Toast.makeText(mContext, location, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private String appendOperator(String num, String location)
+    {
+        String GSM_TDSCDMA[];
+        String WCDMA[];
+        String CDMA2000[];
+        String head = "^(";
+        String tail = ").*$";
+        String[] config = mContext.getResources().getStringArray(
+                R.array.phone_location);
+        num = num.replace("+86", "");
+        // the order in config file:GSM_TDSCDMA,then WCDMA and CDMA2000 last
+        if ((WCDMA = config[1].split(";")) != null
+                && num.matches(head + WCDMA[1] + tail))
+            location += WCDMA[0];
+        else if ((CDMA2000 = config[2].split(";")) != null
+                && num.matches(head + CDMA2000[1] + tail))
+            location += CDMA2000[0];
+        else if ((GSM_TDSCDMA = config[0].split(";")) != null
+                && num.matches(head + GSM_TDSCDMA[1] + tail))
+            location += GSM_TDSCDMA[0];
+        return location;
     }
 
     private static boolean CopyDatToFiles(Context context)

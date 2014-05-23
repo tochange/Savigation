@@ -10,10 +10,11 @@ public interface FloatWindowServiceInterface
     void setLayoutParamsWidthAndHight(LayoutParams layouparameter);
 
     void initEnvironment();
-    
+
     GestureDetector getGestureDetector();
 
     ChildrenInterface getChildrenLinster();
 
     void stickBorder();
+
 }

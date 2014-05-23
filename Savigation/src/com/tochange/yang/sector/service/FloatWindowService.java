@@ -1,5 +1,7 @@
 package com.tochange.yang.sector.service;
 
+import java.util.Arrays;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -13,10 +15,10 @@ import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.RemoteViews;
 
-import com.tochange.yang.R;
 import com.tochange.yang.lib.SimpleLogFile;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
+import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.screenobserver.ScreenObserver.ScreenStateListener;
 import com.tochange.yang.sector.tools.AppUtils;
@@ -70,7 +72,7 @@ public class FloatWindowService extends BaseFloatWindowService
         public boolean onDoubleTap(MotionEvent e)
         {
             saveIsReopen(true);
-            doSomethingOnScreenOff();
+            mSectorButton.playHiddenAnimation();
             return false;
         }
 
@@ -105,20 +107,20 @@ public class FloatWindowService extends BaseFloatWindowService
         {
             isXcoordinate = false;
             tovalue = mScreanH;
-            // top
         }
+        // top
         else if (bottom > top && top < left && top < right)
         {
             isXcoordinate = false;
             tovalue = 0;
-            // left
         }
+        // left
         else if (left < top && right > left && bottom > left)
         {
             isXcoordinate = true;
             tovalue = 0;
-            // right
         }
+        // right
         else if (right < top && right < left && bottom > right)
         {
             isXcoordinate = true;
@@ -126,6 +128,55 @@ public class FloatWindowService extends BaseFloatWindowService
         }
 
         new StickyUpdateTask(isXcoordinate, tovalue).execute();
+    }
+
+    private class HiddenTask extends AsyncTask
+    {
+        int allTime;
+
+        boolean isHidden;
+
+        public HiddenTask(boolean isHidden, int allTime)
+        {
+            this.isHidden = isHidden;
+            this.allTime = allTime;
+        }
+
+        @Override
+        protected Object doInBackground(Object... arg0)
+        {
+            if (isHidden)
+            {
+                int times = allTime / mSleepTime;
+                float offX = mLayoutParams.x / times;
+                float offY = mLayoutParams.y / times;
+                for (int i = 0; i < times || mLayoutParams.x > 0
+                        || mLayoutParams.y > 0; i++, Utils.sleep(mSleepTime))
+                {
+                    mLayoutParams.x -= offX;
+                    mLayoutParams.y -= offY;
+                    publishProgress(mLayoutParams);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Object... values)
+        {
+            super.onProgressUpdate(values);
+            if (!mAlreadyDestory)
+                mWindowManager.updateViewLayout(mFloatLayout, mLayoutParams);
+        }
+
+        @Override
+        protected void onPostExecute(Object result)
+        {
+            super.onPostExecute(result);
+            if (isHidden)
+                doSomethingOnScreenOff();
+        }
+
     }
 
     private class StickyUpdateTask extends AsyncTask
@@ -150,7 +201,7 @@ public class FloatWindowService extends BaseFloatWindowService
                     for (; mLayoutParams.x > 0 && !mStickyHasReset; Utils
                             .sleep(mSleepTime))
                     {
-                        // log.e("x 0 =" + mLayoutParams.x);
+                        log.e("x 0 =" + mLayoutParams.x);
                         mLayoutParams.x -= STICKY_OFFSET;
                         publishProgress(mLayoutParams);
                     }
@@ -160,7 +211,7 @@ public class FloatWindowService extends BaseFloatWindowService
                     for (; mLayoutParams.x < toValue && !mStickyHasReset; Utils
                             .sleep(mSleepTime))
                     {
-                        // log.e("x -0 =" + mLayoutParams.x);
+                        log.e("x -0 =" + mLayoutParams.x);
                         mLayoutParams.x += STICKY_OFFSET;
                         publishProgress(mLayoutParams);
                     }
@@ -258,9 +309,15 @@ public class FloatWindowService extends BaseFloatWindowService
                             : tmp.iconResOff;
                     mChoosedBackClildItemList.get(i).setBackgroundDrawable(
                             getResources().getDrawable(res));
-                    mSectorButton
-                            .updateBackPanelChild();
+                    mSectorButton.updateBackPanelChild();
                 }
+            }
+
+            @Override
+            public void showHiddenAnimation(boolean isHidden, int allTime)
+            {
+                if (isHidden && saveCurrentPosition())
+                    new HiddenTask(true, allTime).execute();
             }
         };
     }
@@ -297,7 +354,6 @@ public class FloatWindowService extends BaseFloatWindowService
                 mNotificationManager.cancelAll();
                 break;
             case SEND_NOTIFICATION:
-                saveCurrentPosition();
                 mNotificationManager.notify(3, getNotification(s));
                 this.stopService(mIntent);
                 break;
@@ -362,14 +418,9 @@ public class FloatWindowService extends BaseFloatWindowService
         }
         else
         {
-            int x = mSharedPreferences.getInt(
-                    AppUtils.PREFERENCESNAME_POSITION_X, DEFAULT_DISPLAY_WIDTH);
-
-            int y = mSharedPreferences.getInt(
-                    AppUtils.PREFERENCESNAME_POSITION_Y, DEFAULT_DISPLAY_HIGHT);
-
-            layouparameter.x = x;
-            layouparameter.y = y;
+            int[] p = getCurrentPosition();
+            layouparameter.x = p[0];
+            layouparameter.y = p[1];
         }
     }
 
@@ -380,7 +431,8 @@ public class FloatWindowService extends BaseFloatWindowService
             mWindowManager.removeView(mFloatLayout);
             mCanNew = true;
         }
-        saveCurrentPosition();
+        // already save!
+        // saveCurrentPosition();
     }
 
     private void beginScreenObserver()
@@ -396,7 +448,8 @@ public class FloatWindowService extends BaseFloatWindowService
             @Override
             public void onScreenOff()
             {
-                doSomethingOnScreenOff();
+                if (saveCurrentPosition())
+                    doSomethingOnScreenOff();
             }
 
             // @Override
@@ -413,9 +466,9 @@ public class FloatWindowService extends BaseFloatWindowService
 
     private void doSomethingOnScreenOff()
     {
-//        log.e("Screen is off");
-        if(mIntent != null)
-           sendNotification(SEND_NOTIFICATION, 2, "i'am hiding here..  >.<");
+        // log.e("Screen is off");
+        if (mIntent != null)
+            sendNotification(SEND_NOTIFICATION, 2, "i'am hiding here..  >.<");
     }
 
     @Override
@@ -437,8 +490,7 @@ public class FloatWindowService extends BaseFloatWindowService
         mShakeListener.stopShakeListen();
         mScreenObserver.stopScreenObserver();
         uiDeal();
-//        SimpleLogFile. killLogcat();
-//        log.e("onDestory");
+        // SimpleLogFile. killLogcat();
+        log.e("onDestory");
     }
-
 }
