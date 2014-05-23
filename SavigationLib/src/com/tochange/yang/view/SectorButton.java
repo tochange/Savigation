@@ -187,6 +187,21 @@ public class SectorButton extends RelativeLayout
         mChildrenLinster = pathAnimMenuLinster;
     }
 
+    public void playHiddenAnimation()
+    {
+
+        AnimationSet animationSet = new AnimationSet(getContext(), null);
+        Animation alphaAnimation = new AlphaAnimation(1, 0);
+        alphaAnimation.setDuration(500);
+        animationSet.addAnimation(alphaAnimation);
+        Animation a = new ScaleAnimation(1, 0, 1, 0,
+                Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f);
+        a.setDuration(200);
+        animationSet.addAnimation(a);
+        animationSet.setDuration(500);
+        this.startAnimation(animationSet);
+        mChildrenLinster.showHiddenAnimation(true,250);
+    }
     public void doFatherListener()
     {
 
