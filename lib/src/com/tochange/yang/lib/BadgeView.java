@@ -7,6 +7,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.graphics.drawable.shapes.RoundRectShape;
+import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -30,6 +31,11 @@ import android.widget.TextView;
  */
 public class BadgeView extends TextView {
 
+	public static final int BACKGROUND_SHAPE_CICLRE = 101;
+	public static final int BACKGROUND_SHAPE_RECTANGLE = 102;
+	public static final int BACKGROUND_SHAPE_OVAL = 103;
+	public static final int BACKGROUND_SHAPE_ROUNDRECTANGLL = 104;
+	
 	public static final int POSITION_TOP_LEFT = 1;
 	public static final int POSITION_TOP_RIGHT = 2;
 	public static final int POSITION_BOTTOM_LEFT = 3;
@@ -40,6 +46,7 @@ public class BadgeView extends TextView {
 	private  int position_r;
 	private  int position_t;
 	private  int position_b;
+	private  int backgroundshape;
 	
 	private static final int DEFAULT_MARGIN_DIP = 5;
 	private static final int DEFAULT_LR_PADDING_DIP = 5;
@@ -327,13 +334,19 @@ public class BadgeView extends TextView {
 	
 	private ShapeDrawable getDefaultBackground() {
 		
-		int r = dipToPixels(DEFAULT_CORNER_RADIUS_DIP);
-		float[] outerR = new float[] {r, r, r, r, r, r, r, r};
-        
-		RoundRectShape rr = new RoundRectShape(outerR, null, null);//yangxj@20140523
-		ShapeDrawable drawable = new ShapeDrawable(new OvalShape() );
+		Shape shape = null;
+		switch(backgroundshape){
+		case BACKGROUND_SHAPE_ROUNDRECTANGLL:
+			int r = dipToPixels(DEFAULT_CORNER_RADIUS_DIP);
+			shape = new RoundRectShape( new float[] {r, r, r, r, r, r, r, r}, null, null);
+			break;
+		case BACKGROUND_SHAPE_OVAL:
+			shape =	new OvalShape();//yangxj@20140523
+			break;
+		}
+		ShapeDrawable drawable = new ShapeDrawable(shape);
 		drawable.getPaint().setColor(badgeColor);
-		drawable.setBounds(100, 100, 100, 100);//yangxj@20140523 draw circle
+//		drawable.setBounds(100, 100, 100, 100);//yangxj@20140523 draw circle
 		return drawable;
 		
 	}
@@ -364,8 +377,7 @@ public class BadgeView extends TextView {
 			lp.setMargins(0, 0, 0, 0);
 			break;			
 	    case POSITION_CUSTOM:
-	        lp.gravity = Gravity.TOP ;//| Gravity.RIGHT ;
-//	        lp.setMargins(0, badgeMarginV, badgeMarginH, 0);
+	        lp.gravity = Gravity.TOP ;
 	        lp.setMargins(position_l, position_t, position_r, position_b);
 	        break;
 	       
@@ -413,6 +425,7 @@ public class BadgeView extends TextView {
 	public void setBadgePosition(int layoutPosition) {
 		this.badgePosition = layoutPosition;
 	}
+	//yangxj@20140523
 	public void setBadgePosition(int l,int t,int r,int b) {
         this.badgePosition = POSITION_CUSTOM;
         position_l = l;
@@ -420,6 +433,10 @@ public class BadgeView extends TextView {
         position_r = r;
         position_b = b;
     }
+	
+	public void setBadgeBackgroundShape(int shape){
+		backgroundshape = shape;
+	}
 	/**
      * Returns the horizontal margin from the target View that is applied to this badge.
      * 
@@ -472,7 +489,7 @@ public class BadgeView extends TextView {
      */
 	public void setBadgeBackgroundColor(int badgeColor) {
 		this.badgeColor = badgeColor;
-		badgeBg = getDefaultBackground();
+//		badgeBg = getDefaultBackground();//yangxj@20140524
 	}
 	
 	private int dipToPixels(int dip) {

@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -32,6 +33,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -40,9 +42,18 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.devspark.appmsg.R;
@@ -644,11 +655,26 @@ public class Utils
         paint.setAntiAlias(true);
         canvas.drawARGB(0, 255, 0, 0);
         paint.setColor(color);
-        canvas.drawOval(rectF, paint);
+        canvas.drawOval(rectF, paint);        
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return dstbmp;
     }
+	public static Bitmap getPathBitmap(Bitmap bitmap,Path path) {
+		Bitmap dstbmp = Bitmap.createBitmap(bitmap.getWidth(),
+				bitmap.getHeight(), Config.ARGB_8888);
+		Canvas canvas = new Canvas(dstbmp);
+		final int color = 0xff00ff00;
+		final Paint paint = new Paint();
+		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+		paint.setAntiAlias(true);
+		canvas.drawARGB(0, 255, 0, 0);
+		paint.setColor(color);
+		canvas.drawPath(path, paint);
+		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+		canvas.drawBitmap(bitmap, rect, rect, paint);
+		return dstbmp;
+	}
 
     public static Bitmap getTransparentOval(Bitmap bitmap)
     {
@@ -667,53 +693,83 @@ public class Utils
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return dstbmp;
     }
-    // class Monitor implements Runnable
-    // {
-    // List<Item> backchild;
-    //
-    // private volatile boolean go = false;
-    //
-    // public Monitor(List<Item> backchild)
-    // {
-    // this.backchild = backchild;
-    // }
-    //
-    // public synchronized void gotMessage() throws InterruptedException
-    // {
-    // go = true;
-    // notify();
-    // }
-    //
-    // public synchronized void watching() throws InterruptedException
-    // {
-    // while (go == false)
-    // wait();
-    // // beginUpdate(backchild);
-    // }
-    //
-    // public void run()
-    // {
-    // try
-    // {
-    // watching();
-    // }
-    // catch (InterruptedException e)
-    // {
-    // e.printStackTrace();
-    // }
-    // }
-    // }
-    // class RefreshTask extends TimerTask {
-    // @Override
-    // public void run() {
-    // handler.post(new Runnable() {
-    // @Override
-    // public void run() {
-    // Toast.makeText(getContext(),
-    // Utils.getUsedPercentValue(mContext),
-    // Toast.LENGTH_SHORT).show();
-    // }
-    // });
-    // }
-    // }
+    
+	public void setUpFloatWindow(String message) {
+		LinearLayout tv = (LinearLayout) LayoutInflater.from(
+				mContext.getApplicationContext()).inflate(R.layout.app_msg,
+				null);
+		TextView t = (TextView) tv.findViewById(android.R.id.message);
+		t.setText(message);
+		t.setTextColor(Color.RED);
+		t.setTextSize(25);
+		WindowManager   wm = (WindowManager) mContext.getSystemService("window");
+		WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+
+		lp.alpha = 1.0f; // lower than one makes it more transparent
+		lp.dimAmount = 0f; // set it higher if you want to dim behind the window
+		lp.gravity = Gravity.CENTER;
+		lp.type = LayoutParams.TYPE_PRIORITY_PHONE;
+		lp.format = PixelFormat.RGBA_8888;// transparent
+		lp.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
+				| LayoutParams.FLAG_NOT_FOCUSABLE;
+		lp.width = LayoutParams.FILL_PARENT;
+		lp.height = LayoutParams.WRAP_CONTENT;// -2
+		wm.addView(tv, lp);
+
+		ScaleAnimation scaleAnimation = new ScaleAnimation(1, 5, 1, 5,
+				Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
+				0.5f);
+		scaleAnimation.setDuration(5000);
+		t.startAnimation(scaleAnimation);
+	}
+     class Monitor implements Runnable
+     {
+     List<String> backchild;
+    
+     private volatile boolean go = false;
+    
+     public Monitor(List<String> backchild)
+     {
+     this.backchild = backchild;
+     }
+    
+     public synchronized void gotMessage() throws InterruptedException
+     {
+     go = true;
+     notify();
+     }
+    
+     public synchronized void watching() throws InterruptedException
+     {
+     while (go == false)
+     wait();
+     // beginUpdate(backchild);
+     }
+    
+     public void run()
+     {
+     try
+     {
+     watching();
+     }
+     catch (InterruptedException e)
+     {
+     e.printStackTrace();
+     }
+     }
+     }
+     class RefreshTask extends TimerTask {
+    	 Handler handler;
+     @Override
+     public void run() {
+     handler.post(new Runnable() {
+     @Override
+     public void run() {
+     Toast.makeText(mContext,
+     Utils.getUsedPercentValue(mContext),
+     Toast.LENGTH_SHORT).show();
+     }
+     });
+     }
+     }
 }
