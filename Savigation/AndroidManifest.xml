@@ -43,8 +43,12 @@
         </receiver>
 
         <service android:name=".service.BaseFloatWindowService" >
+             <intent-filter android:priority="1000" >
+            </intent-filter>
         </service>
         <service android:name=".service.FloatWindowService" >
+            <intent-filter android:priority="1000" >
+            </intent-filter>
         </service>
     </application>
 
