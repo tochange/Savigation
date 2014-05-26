@@ -1,10 +1,17 @@
 package com.tochange.yang.sector.tools.screenshot;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -14,6 +21,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.tochange.yang.R;
+import com.tochange.yang.lib.Utils;
+import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.tools.screenshot.ScreenShotActivity.CaptureCallBack;
 
 public class ScreenShotView extends View
@@ -65,13 +74,37 @@ public class ScreenShotView extends View
 
     private ActionMode mMode = ActionMode.None;
 
+    /*
+     * 以下变量用于自定义形状截图
+     */
+    private int l, t, r, b;
+
+    private Path mPath = new Path();// 自定义图形
+
+    private ArrayList<Point> mCustomShapePointList = new ArrayList<Point>();
+
+    class Point
+    {
+        int x, y;
+
+        public Point(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    /*
+     * 以上变量用于自定义形状截图
+     */
+
     public ScreenShotView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         lineCapturePaint.setStrokeWidth(2F); // 捕获框边框画笔大小
         lineCapturePaint.setStyle(Paint.Style.STROKE);// 画笔风格:空心
         lineCapturePaint.setAntiAlias(true); // 抗锯齿
-        lineCapturePaint.setColor(0x33ccffff); // 画笔颜色#
+        lineCapturePaint.setColor(0xaaccffff); // 画笔颜色#
         Resources resources = context.getResources();
         horStretchArrows = resources.getDrawable(R.drawable.hor_stretch_arrows);
         verStretchArrows = resources.getDrawable(R.drawable.ver_stretch_arrows);
@@ -85,15 +118,16 @@ public class ScreenShotView extends View
 
     boolean isFirstDraw = true;
 
-    boolean isOval = false;
+    int shape;
 
     int startX;
 
     int startY;
 
-    public void setOval(boolean isOval)
+    public void setShape(int shape)
     {
-        this.isOval = isOval;
+        this.shape = shape;
+        invalidate();
     }
 
     public void setCallBack(CaptureCallBack callback)
@@ -104,6 +138,8 @@ public class ScreenShotView extends View
     public void reset()
     {
         isFirstDraw = true;
+        mPath.reset();
+        mCustomShapePointList.clear();
         captureRect.bottom = captureRect.top = captureRect.right = captureRect.left = 0;
         invalidate();
     }
@@ -113,31 +149,32 @@ public class ScreenShotView extends View
             int bottom)
     {
         super.onLayout(changed, left, top, right, bottom);
+        l = left;
+        t = top;
+        r = right;
+        b = bottom;
         // 初始化可视范围及框体大小
         viewRect = new Rect(left, top, right, bottom);
-        int viewWidth = right - left;
-        int viewHeight = bottom - top;
-        int captureWidth = Math.min(viewWidth, viewHeight) * 3 / 5;
-        int captureHeight = viewHeight * 2 / 5;
-        // 将框体绘制在可视范围中间位置
-        int captureX = (viewWidth - captureWidth) / 2;
-        int captureY = (viewHeight - captureHeight) / 2;
-        captureRect = new Rect(captureX, captureY, captureX + captureWidth,
-                captureY + captureHeight);
+        captureRect = new Rect(0, 0, 0, 0);
         reset();
     }
 
     @Override
     protected void onDraw(Canvas canvas)
     {
-        // log.e("onDraw");
         // TODO Auto-generated method stub
         super.onDraw(canvas);
         canvas.save();
+
+        if (shape == ScreenShotActivity.SHAPE_CUSTOM)
+        {
+            drawCustomCustomView(canvas);
+            return;
+        }
         Path path = new Path();
-        if (isOval)
+        if (shape == ScreenShotActivity.SHAPE_OVAL)
             path.addOval(new RectF(captureRect), Path.Direction.CW);// 顺时针闭合框体
-        else
+        else if (shape == ScreenShotActivity.SHAPE_RECT)
             path.addRect(new RectF(captureRect), Path.Direction.CW);// 顺时针闭合框体
         // long press cann't change shot shap
         // if (mCaptureView != null && Build.VERSION.SDK_INT >
@@ -189,6 +226,8 @@ public class ScreenShotView extends View
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
+        int x = (int) event.getX();
+        int y = (int) event.getY();
         switch (event.getAction())
         {
             case MotionEvent.ACTION_DOWN:
@@ -211,8 +250,13 @@ public class ScreenShotView extends View
                     mCaptureView.setMode((grow == GROW_MOVE) ? ActionMode.Move
                             : ActionMode.Grow);
                 }
+                if (addCustomPoint(x, y))
+                    break;
                 break;
             case MotionEvent.ACTION_UP:
+                if (addCustomPoint(x, y))
+                    break;
+
                 isFirstDraw = false;
                 if (mCaptureView != null)
                 {
@@ -225,8 +269,6 @@ public class ScreenShotView extends View
             case MotionEvent.ACTION_MOVE: // 框体移动
                 if (isFirstDraw)
                 {
-                    int x = (int) event.getX();
-                    int y = (int) event.getY();
                     if (y > startY)
                     {
                         captureRect.bottom = y;
@@ -261,16 +303,48 @@ public class ScreenShotView extends View
         return true;
     }
 
+    private boolean addCustomPoint(int x, int y)
+    {
+        if (shape == ScreenShotActivity.SHAPE_CUSTOM)
+        {
+            if (!mCustomShapePointList.isEmpty())
+            {
+                Point last = mCustomShapePointList.get(mCustomShapePointList
+                        .size() - 1);
+                int distant = (int) Math.sqrt((last.x - x) * (last.x - x)
+                        + (last.y - y) * (last.y - y));
+                if (distant < 20)
+                    return true;
+            }
+            mPath.reset();
+            mCustomShapePointList.add(new Point(x, y));
+            if (mCustomShapePointList.size() >= 2)
+            {
+                mPath.moveTo(mCustomShapePointList.get(0).x,
+                        mCustomShapePointList.get(0).y);
+                for (int i = 1; i < mCustomShapePointList.size(); i++)
+                {
+                    mPath.lineTo(mCustomShapePointList.get(i).x,
+                            mCustomShapePointList.get(i).y);
+                }
+                mPath.close();
+            }
+            invalidate();
+            if (mCaptureCallBack != null && mCustomShapePointList.size() >= 3)
+                mCaptureCallBack.upActionNotify();
+            return true;
+        }
+        return false;
+    }
+
     public void setFullScreen(boolean full)
     {
+        // 全屏，则把外部框体颜色设为透明
         if (full)
-        { // 全屏，则把外部框体颜色设为透明
             outsideCapturePaint.setARGB(100, 200, 200, 200);
-        }
+        // 只显示框体区域，框体外部为全黑
         else
-        { // 只显示框体区域，框体外部为全黑
             outsideCapturePaint.setARGB(255, 0, 0, 0);
-        }
     }
 
     private void setMode(ActionMode mode)
@@ -298,33 +372,23 @@ public class ScreenShotView extends View
 
         // 触摸了框体左边缘
         if ((Math.abs(left - x) < effectiveRange) && verticalCheck)
-        {
             grow |= GROW_LEFT_EDGE;
-        }
 
         // 触摸了框体右边缘
         if ((Math.abs(right - x) < effectiveRange) && verticalCheck)
-        {
             grow |= GROW_RIGHT_EDGE;
-        }
 
         // 触摸了框体上边缘
         if ((Math.abs(top - y) < effectiveRange) && horizCheck)
-        {
             grow |= GROW_TOP_EDGE;
-        }
 
         // 触摸了框体下边缘
         if ((Math.abs(bottom - y) < effectiveRange) && horizCheck)
-        {
             grow |= GROW_BOTTOM_EDGE;
-        }
 
         // 触摸框体内部
         if (grow == GROW_NONE && captureRect.contains((int) x, (int) y))
-        {
             grow = GROW_MOVE;
-        }
         return grow;
     }
 
@@ -332,25 +396,17 @@ public class ScreenShotView extends View
     private void handleMotion(int grow, float dx, float dy)
     {
         if (grow == GROW_NONE)
-        {
             return;
-        }
         else if (grow == GROW_MOVE)
-        {
             moveBy(dx, dy); // 移动框体
-        }
         else
         {
             if (((GROW_LEFT_EDGE | GROW_RIGHT_EDGE) & grow) == 0)
-            {
                 dx = 0; // 水平不伸缩
-            }
-
             if (((GROW_TOP_EDGE | GROW_BOTTOM_EDGE) & grow) == 0)
-            {
                 dy = 0; // 垂直不伸缩
-            }
-            growBy((((grow & GROW_LEFT_EDGE) != 0) ? -1 : 1) * dx,
+
+            growBy(grow, (((grow & GROW_LEFT_EDGE) != 0) ? -1 : 1) * dx,
                     (((grow & GROW_TOP_EDGE) != 0) ? -1 : 1) * dy);
         }
     }
@@ -370,7 +426,7 @@ public class ScreenShotView extends View
         invalidate(invalRect); // 重绘指定区域
     }
 
-    private void growBy(float dx, float dy)
+    private void growBy(int grow, float dx, float dy)
     {
         float widthCap = 50F; // captureRect最小宽度
         float heightCap = 50F; // captureRect最小高度
@@ -379,57 +435,104 @@ public class ScreenShotView extends View
 
         // 当captureRect拉伸到宽度 = viewRect的宽度时，则调整dx的值为 0
         if (dx > 0F && r.width() + 2 * dx >= viewRect.width())
-        {
             dx = 0F;
-        }
+
         // 同上
         if (dy > 0F && r.height() + 2 * dy >= viewRect.height())
-        {
             dy = 0F;
-        }
 
-        r.inset(-dx, -dy); // 框体边缘外移
+        if (((grow & GROW_TOP_EDGE) != 0) && (dx == 0))
+            r.set(captureRect.left, captureRect.top - dy, captureRect.right,
+                    captureRect.bottom);
+        else if (((grow & GROW_BOTTOM_EDGE) != 0) && (dx == 0))
+            r.set(captureRect.left, captureRect.top, captureRect.right,
+                    captureRect.bottom + dy);
+        else if (((grow & GROW_LEFT_EDGE) != 0) && (dy == 0))
+            r.set(captureRect.left - dx, captureRect.top, captureRect.right,
+                    captureRect.bottom);
+        else if (((grow & GROW_RIGHT_EDGE) != 0) && (dy == 0))
+            r.set(captureRect.left, captureRect.top, captureRect.right + dx,
+                    captureRect.bottom);
+        else
+            r.inset(-dx, -dy); // 框体边缘外移,原来只有这一句。yangxj@20140526
 
         // 当captureRect缩小到宽度 = widthCap时
         if (r.width() <= widthCap)
-        {
             r.inset(-(widthCap - r.width()) / 2F, 0F);
-        }
-
         // 同上
         if (r.height() <= heightCap)
-        {
             r.inset(0F, -(heightCap - r.height()) / 2F);
-        }
 
         if (r.left < viewRect.left)
-        {
             r.offset(viewRect.left - r.left, 0F);
-        }
         else if (r.right > viewRect.right)
-        {
             r.offset(-(r.right - viewRect.right), 0);
-        }
+
         if (r.top < viewRect.top)
-        {
             r.offset(0F, viewRect.top - r.top);
-        }
         else if (r.bottom > viewRect.bottom)
-        {
             r.offset(0F, -(r.bottom - viewRect.bottom));
-        }
 
         captureRect.set((int) r.left, (int) r.top, (int) r.right,
                 (int) r.bottom);
         invalidate();
     }
 
+    public synchronized Path getCustomPath(int statusBarHeight)
+
+    {
+        ArrayList<Point> list = new ArrayList<Point>();
+        Path p = new Path();
+        list.addAll(mCustomShapePointList);
+        for (Point pp : list)
+            pp.y += statusBarHeight;
+        if (list.size() >= 3)
+        {
+            p.moveTo(list.get(0).x, list.get(0).y);
+            for (int i = 1; i < list.size(); i++)
+                p.lineTo(list.get(i).x, list.get(i).y);
+            p.close();
+            return p;
+        }
+        else
+            return null;
+    }
+
     public synchronized Rect getCaptureRect(int statusBarHight)
     {
-
         captureRect.top += statusBarHight;
         captureRect.bottom += statusBarHight;
         return captureRect;
+    }
+
+    private void clear(Canvas canvas)
+    {
+        Paint paint = new Paint();
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        canvas.drawPaint(paint);
+        // paint.setXfermode(new PorterDuffXfermode(Mode.SRC));
+    }
+
+    private void drawCustomCustomView(Canvas canvas)
+    {
+        Paint paint = new Paint();
+        paint.reset();
+        paint.setARGB(100, 200, 200, 200);
+        canvas.clipPath(mPath, Region.Op.DIFFERENCE);
+        canvas.drawRect(new Rect(l, t, r, b), paint); // 绘制框体外围区域
+
+        paint.reset();
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(0xaaccffff);
+        paint.setAntiAlias(true);// 设置画笔的锯齿效果
+        canvas.drawPath(mPath, paint);
+
+        paint.setColor(0xffccffff);
+        paint.setStrokeWidth(2);
+        for (int i = 0; i < mCustomShapePointList.size(); i++)
+            canvas.drawCircle(mCustomShapePointList.get(i).x,
+                    mCustomShapePointList.get(i).y, 5, paint);// end point
+
     }
 
 }

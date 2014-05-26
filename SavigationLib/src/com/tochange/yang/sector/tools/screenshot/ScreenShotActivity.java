@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -40,7 +41,12 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
 	/**
 	 * default Oval model, value is true
 	 */
-	private boolean mIsOval = true;
+	private int mShape;
+
+	public static final int SHAPE_TOTAL_NUM = 3;
+	public static final int SHAPE_RECT = 0;
+	public static final int SHAPE_OVAL = 1;
+	public static final int SHAPE_CUSTOM = 2;
 
 	/**
 	 * cut result view
@@ -120,7 +126,7 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
 			}
 
 		});
-		mCaptureView.setOval(mIsOval);
+		mCaptureView.setShape(SHAPE_RECT);// default shape
 		mCaptureView.setVisibility(View.VISIBLE);
 	}
 
@@ -263,9 +269,15 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
 			// CopyOfScreenShotActivity cc = new CopyOfScreenShotActivity(1);
 			// Bitmap ret = cc.getScreenShot(cc.getDevice());
 			if (ret != null) {
+				if (mShape % SHAPE_TOTAL_NUM == SHAPE_CUSTOM) {
+					Path p = mCaptureView.getCustomPath(mStatusBarHeight);
+					cutSuccess = p == null ? makeFile(ret) : makeFile(Utils
+							.getPathBitmap(ret, p));
+					return null;
+				}
 				if (cropRect != null) {// rectangle
 					ret = cropImage(ret, cropRect);
-					if (mIsOval)
+					if (mShape % SHAPE_TOTAL_NUM == SHAPE_OVAL)
 						ret = Utils.getOval(ret);
 				}
 				cutSuccess = makeFile(ret);
@@ -304,8 +316,8 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
 	@Override
 	public boolean onLongClick(View v) {
 		mIsLongPress = true;
-		mIsOval = !mIsOval;
-		mCaptureView.setOval(mIsOval);
+		mShape++;
+		mCaptureView.setShape(mShape % SHAPE_TOTAL_NUM);
 		showToast();
 		return false;
 	}
@@ -320,11 +332,21 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
 
 	private void showToast() {
 		String s;
-		if (mIsOval)
-			s = "oval";
-		else
-			s = "rectangle";
+		switch (mShape % SHAPE_TOTAL_NUM) {
+		case SHAPE_CUSTOM:
+			s = "Custom";// 2
+			break;
+		case SHAPE_OVAL:// 1
+			s = "Oval";
+			break;
+		case SHAPE_RECT:// 0
+			s = "Rectangle";
+			break;
+		default:
+			s = "unknow shape";
+		}
+
 		// this can make mShowCutImageView gone,no need to reset (draw auto)
-		Utils.Toast(ScreenShotActivity.this, "change to " + s + " model.");
+		Utils.Toast(ScreenShotActivity.this, s + " model");
 	}
 }
