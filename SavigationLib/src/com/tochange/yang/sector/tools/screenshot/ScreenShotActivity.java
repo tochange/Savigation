@@ -32,321 +32,374 @@ import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.tools.AppUtils;
 
 public class ScreenShotActivity extends Activity implements OnClickListener,
-		OnLongClickListener {
-	/**
-	 * default path to save pictures
-	 */
-	private final String PATH = AppUtils.SCREENSHOT_PATH;
+        OnLongClickListener
+{
+    /**
+     * default path to save pictures
+     */
+    private final String PATH = AppUtils.SCREENSHOT_PATH;
 
-	/**
-	 * default Oval model, value is true
-	 */
-	private int mShape;
+    /**
+     * default Oval model, value is true
+     */
+    private int mShape;
 
-	public static final int SHAPE_TOTAL_NUM = 3;
-	public static final int SHAPE_RECT = 0;
-	public static final int SHAPE_OVAL = 1;
-	public static final int SHAPE_CUSTOM = 2;
+    public static final int SHAPE_TOTAL_NUM = 3;
 
-	/**
-	 * cut result view
-	 */
-	private ScreenShotView mCaptureView;
+    public static final int SHAPE_RECT = 0;
 
-	private ImageView mShowCutImageView;
+    public static final int SHAPE_OVAL = 1;
 
-	private RelativeLayout mAllRelativeLayout;
+    public static final int SHAPE_CUSTOM = 2;
 
-	private boolean mIsLongPress;
+    /**
+     * cut result view
+     */
+    private ScreenShotView mCaptureView;
 
-	private DisplayMetrics mDisplayMetrics;
+    private ImageView mShowCutImageView;
 
-	private FZProgressBar FZProgressBar;
+    private RelativeLayout mAllRelativeLayout;
 
-	private int mStatusBarHeight;
+    private boolean mIsLongPress;
 
-	private Button mCancel;
+    private DisplayMetrics mDisplayMetrics;
 
-	private Button mCut;
+    private FZProgressBar FZProgressBar;
 
-	private String mPicName;
+    private int mStatusBarHeight;
 
-	private String[] mPicFile;
+    private Button mCancel;
 
-	private ScreenShotViewListener mScreenShotViewTouchListener;
+    private Button mCut;
 
-	public static ScreenShotActivity instance;
+    private String mPicName;
 
-	interface CaptureCallBack {
-		void upActionNotify();
-	}
+    private String[] mPicFile;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		instance = this;
-		mPicFile = new String[1];
-		// no need,if so,take status bar height into consider
-		// getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-		// WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		setContentView(R.layout.screenshot_view);
-		findView();
-		setView();
-		setCaptureView();
-		mScreenShotViewTouchListener = new ScreenShotViewListener(this,
-				mPicFile, mShowCutImageView);
-		mShowCutImageView.setOnTouchListener(mScreenShotViewTouchListener);
-		mCancel.setOnClickListener(this);
-		mCut.setOnClickListener(this);
-		mCut.setOnLongClickListener(this);
-	}
+    private ScreenShotViewListener mScreenShotViewTouchListener;
 
-	private void findView() {
-		mCancel = (Button) findViewById(R.id.button_left);
-		mCut = (Button) findViewById(R.id.button_right);
-		FZProgressBar = (FZProgressBar) findViewById(R.id.fancyBarl);
-		mAllRelativeLayout = (RelativeLayout) findViewById(R.id.allview);
-		mShowCutImageView = (ImageView) findViewById(R.id.show_cut);
-		mCaptureView = (ScreenShotView) findViewById(R.id.captureview);
-	}
+    public static ScreenShotActivity instance;
 
-	private void setView() {
-		mCancel.setText(R.string.cancel_exit);
-		mCut.setText(R.string.ok_full);
-		mStatusBarHeight = Utils.getStatusBarHeight(ScreenShotActivity.this);
-		mDisplayMetrics = getResources().getDisplayMetrics();
-		Utils.setProgressBar(FZProgressBar, Color.MAGENTA, Color.CYAN);
-	}
+    interface CaptureCallBack
+    {
+        void upActionNotify();
+    }
 
-	private void setCaptureView() {
-		mCaptureView.setCallBack(new CaptureCallBack() {
-			public void upActionNotify() {
-				mPicName = "";// new file comes,don'nt delete the old
-				updateAfterCutButtonUI();
-			}
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        instance = this;
+        mPicFile = new String[1];
+        // no need,if so,take status bar height into consider
+        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        // WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.screenshot_view);
+        findView();
+        setView();
+        setCaptureView();
+        mScreenShotViewTouchListener = new ScreenShotViewListener(this,
+                mPicFile, mShowCutImageView);
+        mShowCutImageView.setOnTouchListener(mScreenShotViewTouchListener);
+        mCancel.setOnClickListener(this);
+        mCut.setOnClickListener(this);
+        mCut.setOnLongClickListener(this);
+    }
 
-		});
-		mCaptureView.setShape(SHAPE_RECT);// default shape
-		mCaptureView.setVisibility(View.VISIBLE);
-	}
+    private void findView()
+    {
+        mCancel = (Button) findViewById(R.id.button_left);
+        mCut = (Button) findViewById(R.id.button_right);
+        FZProgressBar = (FZProgressBar) findViewById(R.id.fancyBarl);
+        mAllRelativeLayout = (RelativeLayout) findViewById(R.id.allview);
+        mShowCutImageView = (ImageView) findViewById(R.id.show_cut);
+        mCaptureView = (ScreenShotView) findViewById(R.id.captureview);
+    }
 
-	private void updateAfterCutButtonUI() {
-		mCut.setText(R.string.ok_cut);
-		mCancel.setText(R.string.cancei_abandon);
+    private void setView()
+    {
+        mCancel.setText(R.string.cancel_exit);
+        mCut.setText(R.string.ok_full);
+        mStatusBarHeight = Utils.getStatusBarHeight(ScreenShotActivity.this);
+        mDisplayMetrics = getResources().getDisplayMetrics();
+        Utils.setProgressBar(FZProgressBar, Color.MAGENTA, Color.CYAN);
+    }
 
-	}
+    private void setCaptureView()
+    {
+        mCaptureView.setCallBack(new CaptureCallBack() {
+            public void upActionNotify()
+            {
+                mPicName = "";// new file comes,don'nt delete the old
+                updateAfterCutButtonUI();
+            }
 
-	private boolean checkPath(String path) {
-		File f = new File(PATH);
-		if (!f.exists())
-			return f.mkdir();
-		return true;
-	}
+        });
+        mCaptureView.setShape(SHAPE_RECT);// default shape
+        mCaptureView.setVisibility(View.VISIBLE);
+    }
 
-	private Bitmap takeScreenShot(int x, int y, int width, int hight) {
-		// log.e("x=" + x + " y=" + y + " width=" + width + " hight=" + hight);
-		if (checkPath(PATH))
-			return ScreenShotWorker.getScreenBitmap(this);
-		return null;
-	}
+    private void updateAfterCutButtonUI()
+    {
+        mCut.setText(R.string.ok_cut);
+        mCancel.setText(R.string.cancei_abandon);
 
-	private boolean makeFile(Bitmap b) {
-		if (b == null)
-			return false;
-		try {
-			mPicName = PATH + "/sector" + Utils.getCurTimeToString(-1, 0)
-					+ ".png";
-			FileOutputStream out = new FileOutputStream(mPicName);
-			b.compress(Bitmap.CompressFormat.PNG, 100, out);
-			out.flush();
-			out.close();
-		} catch (FileNotFoundException e) {
-			log.e(e.toString());
-		} catch (IOException e) {
-			log.e(e.toString());
-		}
-		return true;
+    }
 
-	}
+    private boolean checkPath(String path)
+    {
+        File f = new File(PATH);
+        if (!f.exists())
+            return f.mkdir();
+        return true;
+    }
 
-	private void deleteFile() {
-		if (mPicName != null && !mPicName.equals("")) {
-			File f = new File(mPicName);
-			if (f.exists())
-				f.delete();
-		}
-	}
+    private Bitmap takeScreenShot(int x, int y, int width, int hight)
+    {
+        // log.e("x=" + x + " y=" + y + " width=" + width + " hight=" + hight);
+        if (checkPath(PATH))
+            return ScreenShotWorker.getScreenBitmap(this);
+        return null;
+    }
 
-	@Override
-	public void onClick(View v) {
-		mShowCutImageView.setVisibility(View.GONE);
-		if (v.getId() == R.id.button_left) {
-			if (mCancel.getText().toString()
-					.equals(getResources().getString(R.string.cancel_exit)))
-				finish();
-			else
-				deleteFile();
-			mCaptureView.reset();
+    private boolean makeFile(Bitmap b)
+    {
+        if (b == null)
+            return false;
+        try
+        {
+            mPicName = PATH + "/sector" + Utils.getCurTimeToString(-1, 0)
+                    + ".png";
+            FileOutputStream out = new FileOutputStream(mPicName);
+            b.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+        }
+        catch (FileNotFoundException e)
+        {
+            log.e(e.toString());
+        }
+        catch (IOException e)
+        {
+            log.e(e.toString());
+        }
+        return true;
 
-			// mCaptureView.setVisibility(View.VISIBLE);
-			mCancel.setText(R.string.cancel_exit);
-			mCut.setText(R.string.ok_full);
-		} else if (v.getId() == R.id.button_right) {
-			if (!mIsLongPress) {
-				if (mCut.getText().toString()
-						.equals(getResources().getString(R.string.ok_save))) {
-					Utils.Toast(this, "save to:" + mPicName);
-					mPicName = "";// more sure for cann't be deleted
-					mCut.setText(R.string.ok_full);
-					mCancel.setText(R.string.cancel_exit);
-				} else
-					new TakeScreenShotTask().execute();
-			}
-			mIsLongPress = false;
-		}
-	}
+    }
 
-	// cut into rectangle
-	private Bitmap cropImage(Bitmap bit, Rect cropRect) {
-		int width = cropRect.width();
-		int height = cropRect.height();
-		Bitmap croppedImage = Bitmap.createBitmap(width, height,
-				Bitmap.Config.ARGB_8888);
-		Canvas canvas = new Canvas(croppedImage);
-		Rect dstRect = new Rect(0, 0, width, height);
-		// log.e(cropRect.top + " " + cropRect.bottom + " " + cropRect.left +
-		// " "
-		// + cropRect.right + " " + cropRect.width() + " "
-		// + cropRect.height());
-		canvas.drawBitmap(bit, cropRect, dstRect, null);
-		return croppedImage;
-	}
+    private void deleteFile()
+    {
+        if (mPicName != null && !mPicName.equals(""))
+        {
+            File f = new File(mPicName);
+            if (f.exists())
+                f.delete();
+        }
+    }
 
-	private Rect getCapture(int statusBarHight) {
-		Rect cropRect = mCaptureView.getCaptureRect(statusBarHight);
-		int width = cropRect.width();
-		int height = cropRect.height();
-		if (width <= 0 || height <= 0)
-			return null;
-		return cropRect;
-	}
+    @Override
+    public void onClick(View v)
+    {
+        mShowCutImageView.setVisibility(View.GONE);
+        if (v.getId() == R.id.button_left)
+        {
+            if (mCancel.getText().toString()
+                    .equals(getResources().getString(R.string.cancel_exit)))
+                finish();
+            else
+                deleteFile();
+            mCaptureView.reset();
 
-	private class TakeScreenShotTask extends AsyncTask<String, Integer, String> {
-		Rect cropRect;
+            // mCaptureView.setVisibility(View.VISIBLE);
+            mCancel.setText(R.string.cancel_exit);
+            mCut.setText(R.string.ok_full);
+        }
+        else if (v.getId() == R.id.button_right)
+        {
+            if (!mIsLongPress)
+            {
+                if (mCut.getText().toString()
+                        .equals(getResources().getString(R.string.ok_save)))
+                {
+                    Utils.Toast(this, "save to:" + mPicName);
+                    mPicName = "";// more sure for cann't be deleted
+                    mCut.setText(R.string.ok_full);
+                    mCancel.setText(R.string.cancel_exit);
+                }
+                else
+                    new TakeScreenShotTask().execute();
+            }
+            mIsLongPress = false;
+        }
+    }
 
-		boolean cutSuccess;
+    // cut into rectangle
+    private Bitmap cropImage(Bitmap bit, Rect cropRect)
+    {
+        int width = cropRect.width();
+        int height = cropRect.height();
+        Bitmap croppedImage = Bitmap.createBitmap(width, height,
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(croppedImage);
+        Rect dstRect = new Rect(0, 0, width, height);
+        // log.e(cropRect.top + " " + cropRect.bottom + " " + cropRect.left +
+        // " "
+        // + cropRect.right + " " + cropRect.width() + " "
+        // + cropRect.height());
+        canvas.drawBitmap(bit, cropRect, dstRect, null);
+        return croppedImage;
+    }
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			Utils.showFZProgressBar(FZProgressBar);
-			cropRect = getCapture(mStatusBarHeight);
-			if (cropRect == null) {
-				mAllRelativeLayout.setVisibility(View.GONE);
-				// Utils.Toast(ScreenShotActivity.this, "haven't capture!");
-				// return;
-			}
-		}
+    private Rect getCapture(int statusBarHight)
+    {
+        Rect cropRect = mCaptureView.getCaptureRect(statusBarHight);
+        int width = cropRect.width();
+        int height = cropRect.height();
+        if (width <= 0 || height <= 0)
+            return null;
+        return cropRect;
+    }
 
-		@Override
-		protected String doInBackground(String... arg0) {
+    private class TakeScreenShotTask extends AsyncTask<String, Integer, String>
+    {
+        Rect cropRect;
 
-			/**
-			 * no need root,but only get current activity's view you can get
-			 * ActivityTask,and find the top activity in stack, but i didn't get
-			 * the root view,someone says 4.0+ has ScreenShot API,but hidden
-			 */
-			/*
-			 * View v = ScreenShotActivity.this.getWindow().getDecorView();
-			 * v.setDrawingCacheEnabled(true); v.buildDrawingCache(); Bitmap ret
-			 * = v.getDrawingCache();
-			 */
-			// get full screen
-			Bitmap ret = takeScreenShot(0, 0 + mStatusBarHeight,
-					mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels
-							- mStatusBarHeight);
+        Path p;
 
-			// CopyOfScreenShotActivity cc = new CopyOfScreenShotActivity(1);
-			// Bitmap ret = cc.getScreenShot(cc.getDevice());
-			if (ret != null) {
-				if (mShape % SHAPE_TOTAL_NUM == SHAPE_CUSTOM) {
-					Path p = mCaptureView.getCustomPath(mStatusBarHeight);
-					cutSuccess = p == null ? makeFile(ret) : makeFile(Utils
-							.getPathBitmap(ret, p));
-					return null;
-				}
-				if (cropRect != null) {// rectangle
-					ret = cropImage(ret, cropRect);
-					if (mShape % SHAPE_TOTAL_NUM == SHAPE_OVAL)
-						ret = Utils.getOval(ret);
-				}
-				cutSuccess = makeFile(ret);
-			}
-			return null;
-		}
+        boolean cutSuccess;
 
-		@Override
-		protected void onPostExecute(String result) {
-			super.onPostExecute(result);
-			Utils.closeFZProgressBar(FZProgressBar);
-			if (!(mAllRelativeLayout.getVisibility() == View.VISIBLE))
-				mAllRelativeLayout.setVisibility(View.VISIBLE);
-			if (cutSuccess) {
-				mPicFile[0] = mPicName;
-				mShowCutImageView.setImageBitmap(BitmapFactory
-						.decodeFile(mPicName));
-				// log.e("file=" + mPicName);
-				mShowCutImageView.setVisibility(View.VISIBLE);
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            Utils.showFZProgressBar(FZProgressBar);
+            cropRect = getCapture(mStatusBarHeight);
+            p = mCaptureView.getCustomPath(mStatusBarHeight);
+            // is custom shape and hasn't capture;not custom shape(maybe cause
+            // problems when there are not mutual condition) and hasn't capture
+            if ((((mShape % ScreenShotActivity.SHAPE_TOTAL_NUM) == ScreenShotActivity.SHAPE_CUSTOM)
+                    && (p == null))
+                    || ((((mShape % ScreenShotActivity.SHAPE_TOTAL_NUM) != ScreenShotActivity.SHAPE_CUSTOM))
+                    && (cropRect == null)))
+            {
+                mAllRelativeLayout.setVisibility(View.GONE);
+                // Utils.Toast(ScreenShotActivity.this, "haven't capture!");
+                // return;
+            }
+        }
 
-				mCut.setText(R.string.ok_save);
-				mCancel.setText(R.string.cancei_abandon);
-			} else {
-				mCancel.setText(R.string.cancel_exit);
-				mCut.setText(R.string.ok_full);
-				Utils.Toast(ScreenShotActivity.this,
-						"fail to capture,pad or unrooted device is unavailable.");
-			}
-			mCaptureView.reset();
-			// not working
-			mScreenShotViewTouchListener.reset(mDisplayMetrics.widthPixels / 2,
-					mDisplayMetrics.heightPixels / 2);
-		}
-	}
+        @Override
+        protected String doInBackground(String... arg0)
+        {
 
-	@Override
-	public boolean onLongClick(View v) {
-		mIsLongPress = true;
-		mShape++;
-		mCaptureView.setShape(mShape % SHAPE_TOTAL_NUM);
-		showToast();
-		return false;
-	}
+            /**
+             * no need root,but only get current activity's view you can get
+             * ActivityTask,and find the top activity in stack, but i didn't get
+             * the root view,someone says 4.0+ has ScreenShot API,but hidden
+             */
+            /*
+             * View v = ScreenShotActivity.this.getWindow().getDecorView();
+             * v.setDrawingCacheEnabled(true); v.buildDrawingCache(); Bitmap ret
+             * = v.getDrawingCache();
+             */
+            // get full screen
+            Bitmap ret = takeScreenShot(0, 0 + mStatusBarHeight,
+                    mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels
+                            - mStatusBarHeight);
 
-	@Override
-	protected void onDestroy() {
-		sendBroadcast(new Intent(
-				Intent.ACTION_MEDIA_MOUNTED,
-				Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-		super.onDestroy();
-	}
+            // CopyOfScreenShotActivity cc = new CopyOfScreenShotActivity(1);
+            // Bitmap ret = cc.getScreenShot(cc.getDevice());
+            if (ret != null)
+            {
+                if (mShape % SHAPE_TOTAL_NUM == SHAPE_CUSTOM)
+                {
+                    cutSuccess = p == null ? makeFile(ret) : makeFile(Utils
+                            .getPathBitmap(ret, p));
+                    return null;
+                }
+                if (cropRect != null)
+                {// rectangle
+                    ret = cropImage(ret, cropRect);
+                    if (mShape % SHAPE_TOTAL_NUM == SHAPE_OVAL)
+                        ret = Utils.getOval(ret);
+                }
+                cutSuccess = makeFile(ret);
+            }
+            return null;
+        }
 
-	private void showToast() {
-		String s;
-		switch (mShape % SHAPE_TOTAL_NUM) {
-		case SHAPE_CUSTOM:
-			s = "Custom";// 2
-			break;
-		case SHAPE_OVAL:// 1
-			s = "Oval";
-			break;
-		case SHAPE_RECT:// 0
-			s = "Rectangle";
-			break;
-		default:
-			s = "unknow shape";
-		}
+        @Override
+        protected void onPostExecute(String result)
+        {
+            super.onPostExecute(result);
+            Utils.closeFZProgressBar(FZProgressBar);
+            if (!(mAllRelativeLayout.getVisibility() == View.VISIBLE))
+                mAllRelativeLayout.setVisibility(View.VISIBLE);
+            if (cutSuccess)
+            {
+                mPicFile[0] = mPicName;
+                mShowCutImageView.setImageBitmap(BitmapFactory
+                        .decodeFile(mPicName));
+                // log.e("file=" + mPicName);
+                mShowCutImageView.setVisibility(View.VISIBLE);
 
-		// this can make mShowCutImageView gone,no need to reset (draw auto)
-		Utils.Toast(ScreenShotActivity.this, s + " model");
-	}
+                mCut.setText(R.string.ok_save);
+                mCancel.setText(R.string.cancei_abandon);
+            }
+            else
+            {
+                mCancel.setText(R.string.cancel_exit);
+                mCut.setText(R.string.ok_full);
+                Utils.Toast(ScreenShotActivity.this,
+                        "fail to capture,pad or unrooted device is unavailable.");
+            }
+            mCaptureView.reset();
+            // not working
+            mScreenShotViewTouchListener.reset(mDisplayMetrics.widthPixels / 2,
+                    mDisplayMetrics.heightPixels / 2);
+        }
+    }
+
+    @Override
+    public boolean onLongClick(View v)
+    {
+        mIsLongPress = true;
+        mShape++;
+        mCaptureView.setShape(mShape % SHAPE_TOTAL_NUM);
+        showToast();
+        Utils.vibrate(this);
+        return false;
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        sendBroadcast(new Intent(
+                Intent.ACTION_MEDIA_MOUNTED,
+                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+        super.onDestroy();
+    }
+
+    private void showToast()
+    {
+        String s;
+        switch (mShape % SHAPE_TOTAL_NUM)
+        {
+            case SHAPE_CUSTOM:
+                s = "Custom";// 2
+                break;
+            case SHAPE_OVAL:// 1
+                s = "Oval";
+                break;
+            case SHAPE_RECT:// 0
+                s = "Rectangle";
+                break;
+            default:
+                s = "unknow shape";
+        }
+
+        // this can make mShowCutImageView gone,no need to reset (draw auto)
+        Utils.Toast(ScreenShotActivity.this, s + " model");
+    }
 }
