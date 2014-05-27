@@ -20,6 +20,7 @@ import java.util.TimerTask;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +44,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -109,6 +111,14 @@ public class Utils
             return ret.subList(0, ret.size() - 10);
         else
             return null;
+    }
+
+    public static void vibrate(Context c)
+    {
+
+        Vibrator  mVibrator = (Vibrator) c.getApplicationContext().getSystemService(
+                Service.VIBRATOR_SERVICE);
+        mVibrator.vibrate(new long[] { 50, 50, 0, 0 }, -1);
     }
 
     public static void getFileInfo(File[] fileList, ArrayList<FileInfos> list,
