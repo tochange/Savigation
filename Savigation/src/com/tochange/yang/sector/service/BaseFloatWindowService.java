@@ -84,8 +84,6 @@ public abstract class BaseFloatWindowService extends Service implements
 
     protected Item mFatherItem;
 
-    protected Vibrator mVibrator;
-
     protected List<Item> mChoosedBackClildItemList;
 
     protected List<List<Item>> mClildItemList;
@@ -121,8 +119,6 @@ public abstract class BaseFloatWindowService extends Service implements
         instance = this;
         if (mNotificationManager == null)
             mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mVibrator = (Vibrator) getApplication().getSystemService(
-                Service.VIBRATOR_SERVICE);
         mGestureDetector = getGestureDetector();
         mLayoutParams = new LayoutParams();
         mWindowManager = (WindowManager) getApplication().getSystemService(
@@ -323,11 +319,11 @@ public abstract class BaseFloatWindowService extends Service implements
 
     }
 
-    protected void saveIsReopen(boolean isReopen)
+    protected boolean saveIsReopen(boolean isReopen)
     {
         Editor editor = mSharedPreferences.edit();
         editor.putBoolean(AppUtils.PREFERENCES_ISREOPEN, isReopen);
-        editor.commit();
+        return editor.commit();
     }
 
     protected boolean saveCurrentPosition()

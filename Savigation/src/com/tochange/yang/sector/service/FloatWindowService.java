@@ -36,7 +36,7 @@ public class FloatWindowService extends BaseFloatWindowService
             // mSectorButton.setSticky(!mIsSticky);
             // stickBorder();
             // mIsSticky = !mIsSticky;
-            mVibrator.vibrate(new long[] { 50, 50, 0, 0 }, -1);
+            Utils.vibrate(FloatWindowService.this);
             mCanMove = !mCanMove;
             int res = mCanMove ? R.drawable.composer_father_l
                     : R.drawable.composer_father_ll;
@@ -71,8 +71,8 @@ public class FloatWindowService extends BaseFloatWindowService
         @Override
         public boolean onDoubleTap(MotionEvent e)
         {
-            saveIsReopen(true);
-            mSectorButton.playHiddenAnimation();
+            if (saveIsReopen(true))
+                mSectorButton.playHiddenAnimation();
             return false;
         }
 
@@ -406,7 +406,7 @@ public class FloatWindowService extends BaseFloatWindowService
                 && mIntent.getExtras() != null
                 && !mIntent.getExtras()
                         .getBoolean(AppUtils.KEY_ISREOPEN, false))
-        {
+        {log.e("1");
             mScreanW = mIntent.getIntExtra(AppUtils.KEY_SCREEN_W,
                     DEFAULT_DISPLAY_WIDTH);
             mScreanH = mIntent.getIntExtra(AppUtils.KEY_SCREEN_H,
@@ -417,7 +417,7 @@ public class FloatWindowService extends BaseFloatWindowService
 
         }
         else
-        {
+        {log.e("2");
             int[] p = getCurrentPosition();
             layouparameter.x = p[0];
             layouparameter.y = p[1];
