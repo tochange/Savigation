@@ -17,6 +17,7 @@ import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import com.tochange.yang.R;
+import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.service.BaseFloatWindowService;
 import com.tochange.yang.sector.service.FloatWindowService;
@@ -58,12 +59,13 @@ public class StaticBroadcastReceiver extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent)
     {
+        String action = intent.getAction();
         mContext = context;
         // screen unlock
-        if (Intent.ACTION_USER_PRESENT.equals(intent.getAction()))
+        if (Intent.ACTION_USER_PRESENT.equals(action))
             restartService();
         // application uninstall
-        else if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction()))
+        else if (Intent.ACTION_PACKAGE_REMOVED.equals(action))
         {
             BaseFloatWindowService service = BaseFloatWindowService.instance;
             if (service != null)
@@ -84,14 +86,14 @@ public class StaticBroadcastReceiver extends BroadcastReceiver
             }
         }
         // outgoing phone call
-        else if (intent.getAction().equals(Intent.ACTION_NEW_OUTGOING_CALL))
+        else if (action.equals(Intent.ACTION_NEW_OUTGOING_CALL))
         {
             String outgoingNum = intent
                     .getStringExtra(Intent.EXTRA_PHONE_NUMBER);
             showLocation(outgoingNum);
         }
         // dangerous way,but i haven't found incoming action api
-        else if (intent.getAction().equals("android.intent.action.PHONE_STATE"))
+        else if (action.equals("android.intent.action.PHONE_STATE"))
         {
             TelephonyManager tm = (TelephonyManager) context
                     .getSystemService(Service.TELEPHONY_SERVICE);
@@ -150,7 +152,8 @@ public class StaticBroadcastReceiver extends BroadcastReceiver
 
     private void showLocation(String num)
     {
-        if (CopyDatToFiles(mContext))
+        if (Utils.copyAssetsToFiles(mContext,
+                AppUtils.PHONELOCATION_FILENAME))
         {
             String location = GetLocationByNumber.getCallerInfo(num, mContext);
             location = appendOperator(num, location);
@@ -179,41 +182,5 @@ public class StaticBroadcastReceiver extends BroadcastReceiver
                 && num.matches(head + GSM_TDSCDMA[1] + tail))
             location += GSM_TDSCDMA[0];
         return location;
-    }
-
-    private static boolean CopyDatToFiles(Context context)
-    {
-        if (!(new File(context.getFilesDir() + File.separator
-                + GetLocationByNumber.PHONELOCATION_FILENAME)).exists())
-        {
-            try
-            {
-                InputStream inputStream = context.getAssets().open(
-                        GetLocationByNumber.PHONELOCATION_FILENAME);
-                int length = inputStream.available();
-                byte[] buffer = new byte[length];
-                inputStream.read(buffer);
-                inputStream.close();
-                FileOutputStream fileOutputStream = context.openFileOutput(
-                        GetLocationByNumber.PHONELOCATION_FILENAME,
-                        Context.MODE_PRIVATE);
-                fileOutputStream.write(buffer);
-                fileOutputStream.close();
-                return true;
-            }
-            catch (FileNotFoundException e)
-            {
-                log.e(e.toString());
-                return false;
-            }
-            catch (IOException e)
-            {
-                log.e(e.toString());
-                return false;
-            }
-
-        }
-        else
-            return true;
     }
 }

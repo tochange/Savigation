@@ -57,7 +57,6 @@ public class BackAdapter extends BaseAdapter
     public View getView(final int position, View convertView, ViewGroup parent)
     {
         SelectViewHolder viewHolder = null;
-//        log.e(".....");
         if (convertView == null)
         {
             viewHolder = new SelectViewHolder();

@@ -1,24 +1,19 @@
 package com.tochange.yang.sector.service;
 
-import java.util.Arrays;
-
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.IBinder;
 import android.text.format.Time;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.RemoteViews;
 
-import com.tochange.yang.lib.SimpleLogFile;
+import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
-import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.screenobserver.ScreenObserver.ScreenStateListener;
 import com.tochange.yang.sector.tools.AppUtils;
@@ -201,7 +196,7 @@ public class FloatWindowService extends BaseFloatWindowService
                     for (; mLayoutParams.x > 0 && !mStickyHasReset; Utils
                             .sleep(mSleepTime))
                     {
-                        log.e("x 0 =" + mLayoutParams.x);
+                        // log.e("x 0 =" + mLayoutParams.x);
                         mLayoutParams.x -= STICKY_OFFSET;
                         publishProgress(mLayoutParams);
                     }
@@ -211,7 +206,7 @@ public class FloatWindowService extends BaseFloatWindowService
                     for (; mLayoutParams.x < toValue && !mStickyHasReset; Utils
                             .sleep(mSleepTime))
                     {
-                        log.e("x -0 =" + mLayoutParams.x);
+                        // log.e("x -0 =" + mLayoutParams.x);
                         mLayoutParams.x += STICKY_OFFSET;
                         publishProgress(mLayoutParams);
                     }
@@ -247,8 +242,6 @@ public class FloatWindowService extends BaseFloatWindowService
         protected void onProgressUpdate(Object... values)
         {
             super.onProgressUpdate(values);
-            // log.e("onProgressUpdate=" );
-            // if (FloatWindowService.this.isRestricted())
             if (!mAlreadyDestory)
                 mWindowManager.updateViewLayout(mFloatLayout, mLayoutParams);
         }
@@ -316,7 +309,7 @@ public class FloatWindowService extends BaseFloatWindowService
             @Override
             public void showHiddenAnimation(boolean isHidden, int allTime)
             {
-                if (isHidden && saveCurrentPosition())
+                if (isHidden)// && saveCurrentPosition()//no need to do so
                     new HiddenTask(true, allTime).execute();
             }
         };
@@ -406,7 +399,7 @@ public class FloatWindowService extends BaseFloatWindowService
                 && mIntent.getExtras() != null
                 && !mIntent.getExtras()
                         .getBoolean(AppUtils.KEY_ISREOPEN, false))
-        {log.e("1");
+        {
             mScreanW = mIntent.getIntExtra(AppUtils.KEY_SCREEN_W,
                     DEFAULT_DISPLAY_WIDTH);
             mScreanH = mIntent.getIntExtra(AppUtils.KEY_SCREEN_H,
@@ -414,10 +407,11 @@ public class FloatWindowService extends BaseFloatWindowService
 
             layouparameter.x = (int) (1.0 / 6 * mScreanW);
             layouparameter.y = (int) (1.0 / 4 * mScreanH);
+            saveCurrentPosition();
 
         }
         else
-        {log.e("2");
+        {
             int[] p = getCurrentPosition();
             layouparameter.x = p[0];
             layouparameter.y = p[1];
@@ -431,8 +425,6 @@ public class FloatWindowService extends BaseFloatWindowService
             mWindowManager.removeView(mFloatLayout);
             mCanNew = true;
         }
-        // already save!
-        // saveCurrentPosition();
     }
 
     private void beginScreenObserver()
@@ -441,15 +433,26 @@ public class FloatWindowService extends BaseFloatWindowService
         mScreenObserver.requestScreenStateUpdate(new ScreenStateListener() {
             @Override
             public void onScreenOn()
-            {
+            {//no use,yangxj@20140609
                 doSomethingOnScreenOn();
             }
 
             @Override
             public void onScreenOff()
             {
-                if (saveCurrentPosition())
-                    doSomethingOnScreenOff();
+                doSomethingOnScreenOff();
+            }
+
+            @Override
+            public void onDialogClose(Intent intent)
+            {//no use,yangxj@20140609
+                String reason = intent.getStringExtra("reason");
+                if (reason.equals("homekey"))
+                    log.e("home key");
+                else if (reason.equals("recentapps"))
+                    log.e("recentapps key");
+                else
+                    log.e("other");
             }
 
             // @Override
@@ -461,12 +464,11 @@ public class FloatWindowService extends BaseFloatWindowService
 
     private void doSomethingOnScreenOn()
     {
-        // log.e("Screen is on");
+        log.e("Screen on");
     }
 
     private void doSomethingOnScreenOff()
     {
-        // log.e("Screen is off");
         if (mIntent != null)
             sendNotification(SEND_NOTIFICATION, 2, "i'am hiding here..  >.<");
     }
@@ -490,7 +492,6 @@ public class FloatWindowService extends BaseFloatWindowService
         mShakeListener.stopShakeListen();
         mScreenObserver.stopScreenObserver();
         uiDeal();
-        // SimpleLogFile. killLogcat();
         log.e("onDestory");
     }
 }

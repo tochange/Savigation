@@ -7,13 +7,11 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Vibrator;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,9 +22,9 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.RelativeLayout;
 
+import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
-//import com.tochange.yang.lib.log;
-import com.tochange.yang.sector.R;
+import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.shake.ShakeInterface;
 import com.tochange.yang.sector.shake.ShakeListener;
@@ -140,8 +138,7 @@ public abstract class BaseFloatWindowService extends Service implements
         {
             mCanNew = false;
             createFloatView();
-//            if (!intentNotReOpen())
-//                showHiddenAnimation(false);
+
             mCanReStartShake = true;
             mAlreadyDestory = false;
             mShakeListener = new ShakeListener(this);
@@ -197,7 +194,8 @@ public abstract class BaseFloatWindowService extends Service implements
                 if (mIsMoving && event.getAction() == MotionEvent.ACTION_UP)
                 {
                     mIsMoving = false;
-                    saveCurrentPosition();
+                    if (!saveCurrentPosition())
+                        log.e("save position error!");
                     if (mIsSticky && !mStickyHasReset)
                     {
                         mStickyHasReset = true;
@@ -211,7 +209,7 @@ public abstract class BaseFloatWindowService extends Service implements
                 }
                 return true;
             }
-        });
+        });                     
     }
 
     private void getAndSetSectorButton()

@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.tochange.yang.R;
 import com.tochange.yang.lib.FZProgressBar;
 import com.tochange.yang.lib.SimpleLogFile;
 import com.tochange.yang.lib.SlideMenu;
@@ -31,34 +32,30 @@ import com.tochange.yang.sector.tools.BackItemInfo;
 public class SectorButtonMainActivity extends Activity implements
         OnClickListener
 {
-
+    // for app list
     private ListView mListView;
 
+    // for tools list,in the back
     private ListView mListViewBack;
 
+    // progress bar when loading app and tools data
     private FZProgressBar FZProgressBar;
 
     private Button start, remove;
 
     private SlideMenu slideMenu;
 
-
+    // app data
     private ArrayList<AppData> mCheckAppList = new ArrayList<AppData>();
 
+    // tools data
     private ArrayList<BackItemInfo> mBackList = new ArrayList<BackItemInfo>();
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-//        Display d = getWindowManager().getDefaultDisplay();
-//        int w = d.getWidth();
-//        int h = d.getHeight();
-//        DisplayMetrics dm = new DisplayMetrics();
-//        dm = getResources().getDisplayMetrics();
-//        Toast.makeText(SectorButtonMainActivity.this, w + "  " + h + "　" + dm.density, Toast.LENGTH_LONG).show();
-        
+        // write log file
         SimpleLogFile.captureLogToFile(this, getApplication().getPackageName());
 
         Utils.setContext(this);
@@ -66,6 +63,7 @@ public class SectorButtonMainActivity extends Activity implements
         findView();
         Utils.setProgressBar(FZProgressBar, Color.MAGENTA);
 
+        // put app and tools data into adapter
         ListToAdapter listener = new ListToAdapter(this, mListView,
                 mListViewBack, mCheckAppList, mBackList);
         listener.myNotify();
@@ -86,6 +84,10 @@ public class SectorButtonMainActivity extends Activity implements
         FZProgressBar = (FZProgressBar) findViewById(R.id.fancyBar1);
     }
 
+    /**
+     * load data,restore in shape preference too
+     * @author yangxj
+     */
     private class PutParameterTask extends AsyncTask<String, Integer, String>
     {
         @Override
@@ -100,11 +102,19 @@ public class SectorButtonMainActivity extends Activity implements
         @Override
         protected String doInBackground(String... params)
         {
+            Intent intent = new Intent(SectorButtonMainActivity.this,
+                    FloatWindowService.class);
+            putDataToIntentAndRestoreToPreference(intent);
+            stopService(intent);// now can change child without close app
+            startService(intent);
+            return null;
+        }
+
+        private void putDataToIntentAndRestoreToPreference(Intent intent)
+        {
             SharedPreferences sp = getSharedPreferences(
                     AppUtils.PREFERENCES_FILENAME, Context.MODE_PRIVATE);
             Editor editor = sp.edit();
-            Intent intent = new Intent(SectorButtonMainActivity.this,
-                    FloatWindowService.class);
             int value = getBackPanelValue();
             intent.putExtra(AppUtils.KEY_ISREOPEN, false);
             intent.putExtra(AppUtils.KEY_BACKPANEL_VALUES, value);
@@ -141,11 +151,13 @@ public class SectorButtonMainActivity extends Activity implements
             editor.putInt(AppUtils.KEY_SIZE, size);
             editor.commit();
             intent.putExtra(AppUtils.KEY_SIZE, size);
-            stopService(intent);// now can change child without close app
-            startService(intent);
-            return null;
+
         }
 
+        /**
+         * get those chosen item tools int values
+         * @return
+         */
         private int getBackPanelValue()
         {
             int ret = 0;
@@ -163,7 +175,7 @@ public class SectorButtonMainActivity extends Activity implements
         protected void onPostExecute(String result)
         {
             finish();
-            Utils.closeFZProgressBar(FZProgressBar);//have to?
+            Utils.closeFZProgressBar(FZProgressBar);// have to?
         }
 
     }

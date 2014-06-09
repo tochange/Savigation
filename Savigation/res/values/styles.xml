@@ -4,4 +4,13 @@
         <item name="android:button">@drawable/btn_check_holo_light</item>
     </style>
 
+    <style name="PopupAnimation" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/activity_slide_up</item>
+        <item name="android:windowExitAnimation">@anim/activity_slide_down</item>
+    </style>
+
+    <style name="Theme.FloatingWindow.Popup" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowAnimationStyle">@style/PopupAnimation</item>
+    </style>
+
 </resources>
