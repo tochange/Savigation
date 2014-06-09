@@ -6,8 +6,11 @@ import static com.tochange.yang.lib.toast.AppMsg.LENGTH_SHORT;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -19,8 +22,8 @@ import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Service;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -65,12 +68,65 @@ import com.tochange.yang.lib.toast.AppMsg;
 public class Utils
 {
     static Context mContext;
-
     public static void setContext(Context c)
     {
         mContext = c;
     }
+    public static boolean copyAssetsToFiles(Context context, String filaName)
+    {
+        if (!(new File(context.getFilesDir() + File.separator + filaName))
+                .exists())
+        {
+            try
+            {
+                InputStream inputStream = context.getAssets().open(filaName);
+                int length = inputStream.available();
+                byte[] buffer = new byte[length];
+                inputStream.read(buffer);
+                inputStream.close();
+                FileOutputStream fileOutputStream = context.openFileOutput(
+                        filaName, Context.MODE_PRIVATE);
+                fileOutputStream.write(buffer);
+                fileOutputStream.close();
+                return true;
+            }
+            catch (FileNotFoundException e)
+            {
+                log.e(e.toString());
+                return false;
+            }
+            catch (IOException e)
+            {
+                log.e(e.toString());
+                return false;
+            }
 
+        }
+        else
+            return true;
+    }
+    public static boolean bitmapToPNGFile(Bitmap b, String fileName)
+    {
+        if (b == null)
+            return false;
+        try
+        {
+            FileOutputStream out = new FileOutputStream(fileName);
+            b.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+        }
+        catch (FileNotFoundException e)
+        {
+            log.e(e.toString());
+        }
+        catch (IOException e)
+        {
+            log.e(e.toString());
+        }
+        return true;
+
+    }
     static class FileInfos
     {
         Calendar c;
@@ -665,26 +721,28 @@ public class Utils
         paint.setAntiAlias(true);
         canvas.drawARGB(0, 255, 0, 0);
         paint.setColor(color);
-        canvas.drawOval(rectF, paint);        
+        canvas.drawOval(rectF, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return dstbmp;
     }
-	public static Bitmap getPathBitmap(Bitmap bitmap,Path path) {
-		Bitmap dstbmp = Bitmap.createBitmap(bitmap.getWidth(),
-				bitmap.getHeight(), Config.ARGB_8888);
-		Canvas canvas = new Canvas(dstbmp);
-		final int color = 0xff00ff00;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 255, 0, 0);
-		paint.setColor(color);
-		canvas.drawPath(path, paint);
-		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-		return dstbmp;
-	}
+
+    public static Bitmap getPathBitmap(Bitmap bitmap, Path path)
+    {
+        Bitmap dstbmp = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Config.ARGB_8888);
+        Canvas canvas = new Canvas(dstbmp);
+        final int color = 0xff00ff00;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 255, 0, 0);
+        paint.setColor(color);
+        canvas.drawPath(path, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return dstbmp;
+    }
 
     public static Bitmap getTransparentOval(Bitmap bitmap)
     {
@@ -703,83 +761,90 @@ public class Utils
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return dstbmp;
     }
-    
-	public void setUpFloatWindow(String message) {
-		LinearLayout tv = (LinearLayout) LayoutInflater.from(
-				mContext.getApplicationContext()).inflate(R.layout.app_msg,
-				null);
-		TextView t = (TextView) tv.findViewById(android.R.id.message);
-		t.setText(message);
-		t.setTextColor(Color.RED);
-		t.setTextSize(25);
-		WindowManager   wm = (WindowManager) mContext.getSystemService("window");
-		WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 
-		lp.alpha = 1.0f; // lower than one makes it more transparent
-		lp.dimAmount = 0f; // set it higher if you want to dim behind the window
-		lp.gravity = Gravity.CENTER;
-		lp.type = LayoutParams.TYPE_PRIORITY_PHONE;
-		lp.format = PixelFormat.RGBA_8888;// transparent
-		lp.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
-				| LayoutParams.FLAG_NOT_FOCUSABLE;
-		lp.width = LayoutParams.FILL_PARENT;
-		lp.height = LayoutParams.WRAP_CONTENT;// -2
-		wm.addView(tv, lp);
+    public void setUpFloatWindow(String message)
+    {
+        LinearLayout tv = (LinearLayout) LayoutInflater.from(
+                mContext.getApplicationContext()).inflate(R.layout.app_msg,
+                null);
+        TextView t = (TextView) tv.findViewById(android.R.id.message);
+        t.setText(message);
+        t.setTextColor(Color.RED);
+        t.setTextSize(25);
+        WindowManager wm = (WindowManager) mContext.getSystemService("window");
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 
-		ScaleAnimation scaleAnimation = new ScaleAnimation(1, 5, 1, 5,
-				Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
-				0.5f);
-		scaleAnimation.setDuration(5000);
-		t.startAnimation(scaleAnimation);
-	}
-     class Monitor implements Runnable
-     {
-     List<String> backchild;
-    
-     private volatile boolean go = false;
-    
-     public Monitor(List<String> backchild)
-     {
-     this.backchild = backchild;
-     }
-    
-     public synchronized void gotMessage() throws InterruptedException
-     {
-     go = true;
-     notify();
-     }
-    
-     public synchronized void watching() throws InterruptedException
-     {
-     while (go == false)
-     wait();
-     // beginUpdate(backchild);
-     }
-    
-     public void run()
-     {
-     try
-     {
-     watching();
-     }
-     catch (InterruptedException e)
-     {
-     e.printStackTrace();
-     }
-     }
-     }
-     class RefreshTask extends TimerTask {
-    	 Handler handler;
-     @Override
-     public void run() {
-     handler.post(new Runnable() {
-     @Override
-     public void run() {
-     Toast.makeText(mContext,
-     Utils.getUsedPercentValue(mContext),
-     Toast.LENGTH_SHORT).show();
-     }
-     });
-     }
-     }
+        lp.alpha = 1.0f; // lower than one makes it more transparent
+        lp.dimAmount = 0f; // set it higher if you want to dim behind the window
+        lp.gravity = Gravity.CENTER;
+        lp.type = LayoutParams.TYPE_PRIORITY_PHONE;
+        lp.format = PixelFormat.RGBA_8888;// transparent
+        lp.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | LayoutParams.FLAG_NOT_FOCUSABLE;
+        lp.width = LayoutParams.FILL_PARENT;
+        lp.height = LayoutParams.WRAP_CONTENT;// -2
+        wm.addView(tv, lp);
+
+        ScaleAnimation scaleAnimation = new ScaleAnimation(1, 5, 1, 5,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
+                0.5f);
+        scaleAnimation.setDuration(5000);
+        t.startAnimation(scaleAnimation);
+    }
+
+    class Monitor implements Runnable
+    {
+        List<String> backchild;
+
+        private volatile boolean go = false;
+
+        public Monitor(List<String> backchild)
+        {
+            this.backchild = backchild;
+        }
+
+        public synchronized void gotMessage() throws InterruptedException
+        {
+            go = true;
+            notify();
+        }
+
+        public synchronized void watching() throws InterruptedException
+        {
+            while (go == false)
+                wait();
+            // beginUpdate(backchild);
+        }
+
+        public void run()
+        {
+            try
+            {
+                watching();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class RefreshTask extends TimerTask
+    {
+        Handler handler;
+
+        @Override
+        public void run()
+        {
+            handler.post(new Runnable() {
+                @Override
+                public void run()
+                {
+                    Toast.makeText(mContext,
+                            Utils.getUsedPercentValue(mContext),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
 }
