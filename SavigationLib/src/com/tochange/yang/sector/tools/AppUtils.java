@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import com.tochange.yang.R;
 
 public class AppUtils {
+    public static final String PHONELOCATION_FILENAME               = "AreaData.dat";  
 	public static final String SCREENSHOT_PATH                      = "/mnt/sdcard/sector";
+	public static final String SCREENSHOT_PICPREFIX                 = "sector";
 	public static final String KEY_PACKAGENAME                      = "packagename";
 	public static final String KEY_IMAGESTRING                      = "imagestring";
 	public static final String KEY_SCREEN_W                         = "screenwidth";

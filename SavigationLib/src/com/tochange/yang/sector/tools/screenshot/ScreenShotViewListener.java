@@ -155,6 +155,7 @@ public class ScreenShotViewListener implements OnTouchListener
             {
                 Intent i = Utils.getShareIntent(new File(mFile[0]));
                 mContext.startActivity(i);
+                Utils.vibrate(ScreenShotActivity.instance);
                 ScreenShotActivity.instance.finish();
             }
         }

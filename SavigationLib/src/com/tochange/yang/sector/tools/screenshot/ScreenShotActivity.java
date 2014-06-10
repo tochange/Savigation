@@ -1,9 +1,6 @@
 package com.tochange.yang.sector.tools.screenshot;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -28,7 +25,6 @@ import android.widget.RelativeLayout;
 import com.tochange.yang.R;
 import com.tochange.yang.lib.FZProgressBar;
 import com.tochange.yang.lib.Utils;
-import com.tochange.yang.lib.log;
 import com.tochange.yang.sector.tools.AppUtils;
 
 public class ScreenShotActivity extends Activity implements OnClickListener,
@@ -163,31 +159,6 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
         return null;
     }
 
-    private boolean makeFile(Bitmap b)
-    {
-        if (b == null)
-            return false;
-        try
-        {
-            mPicName = PATH + "/sector" + Utils.getCurTimeToString(-1, 0)
-                    + ".png";
-            FileOutputStream out = new FileOutputStream(mPicName);
-            b.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-        }
-        catch (FileNotFoundException e)
-        {
-            log.e(e.toString());
-        }
-        catch (IOException e)
-        {
-            log.e(e.toString());
-        }
-        return true;
-
-    }
-
     private void deleteFile()
     {
         if (mPicName != null && !mPicName.equals(""))
@@ -243,10 +214,6 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
                 Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(croppedImage);
         Rect dstRect = new Rect(0, 0, width, height);
-        // log.e(cropRect.top + " " + cropRect.bottom + " " + cropRect.left +
-        // " "
-        // + cropRect.right + " " + cropRect.width() + " "
-        // + cropRect.height());
         canvas.drawBitmap(bit, cropRect, dstRect, null);
         return croppedImage;
     }
@@ -263,11 +230,11 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
 
     private class TakeScreenShotTask extends AsyncTask<String, Integer, String>
     {
-        Rect cropRect;
+        private Rect cropRect;
 
-        Path p;
+        private Path p;
 
-        boolean cutSuccess;
+        private boolean cutSuccess;
 
         @Override
         protected void onPreExecute()
@@ -278,10 +245,8 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
             p = mCaptureView.getCustomPath(mStatusBarHeight);
             // is custom shape and hasn't capture;not custom shape(maybe cause
             // problems when there are not mutual condition) and hasn't capture
-            if ((((mShape % ScreenShotActivity.SHAPE_TOTAL_NUM) == ScreenShotActivity.SHAPE_CUSTOM)
-                    && (p == null))
-                    || ((((mShape % ScreenShotActivity.SHAPE_TOTAL_NUM) != ScreenShotActivity.SHAPE_CUSTOM))
-                    && (cropRect == null)))
+            if ((((mShape % ScreenShotActivity.SHAPE_TOTAL_NUM) == ScreenShotActivity.SHAPE_CUSTOM) && (p == null))
+                    || ((((mShape % ScreenShotActivity.SHAPE_TOTAL_NUM) != ScreenShotActivity.SHAPE_CUSTOM)) && (cropRect == null)))
             {
                 mAllRelativeLayout.setVisibility(View.GONE);
                 // Utils.Toast(ScreenShotActivity.this, "haven't capture!");
@@ -312,10 +277,14 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
             // Bitmap ret = cc.getScreenShot(cc.getDevice());
             if (ret != null)
             {
+                mPicName = PATH + File.separator
+                        + AppUtils.SCREENSHOT_PICPREFIX
+                        + Utils.getCurTimeToString(-1, 0) + ".png";
                 if (mShape % SHAPE_TOTAL_NUM == SHAPE_CUSTOM)
                 {
-                    cutSuccess = p == null ? makeFile(ret) : makeFile(Utils
-                            .getPathBitmap(ret, p));
+                    cutSuccess = (p == null) ? Utils.bitmapToPNGFile(ret,
+                            mPicName) : Utils.bitmapToPNGFile(
+                            Utils.getPathBitmap(ret, p), mPicName);
                     return null;
                 }
                 if (cropRect != null)
@@ -324,7 +293,7 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
                     if (mShape % SHAPE_TOTAL_NUM == SHAPE_OVAL)
                         ret = Utils.getOval(ret);
                 }
-                cutSuccess = makeFile(ret);
+                cutSuccess = Utils.bitmapToPNGFile(ret, mPicName);
             }
             return null;
         }
@@ -341,7 +310,6 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
                 mPicFile[0] = mPicName;
                 mShowCutImageView.setImageBitmap(BitmapFactory
                         .decodeFile(mPicName));
-                // log.e("file=" + mPicName);
                 mShowCutImageView.setVisibility(View.VISIBLE);
 
                 mCut.setText(R.string.ok_save);
@@ -374,7 +342,7 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
 
     @Override
     protected void onDestroy()
-    {
+    {// refresh to see screen shot file direct
         sendBroadcast(new Intent(
                 Intent.ACTION_MEDIA_MOUNTED,
                 Uri.parse("file://" + Environment.getExternalStorageDirectory())));
@@ -386,8 +354,8 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
         String s;
         switch (mShape % SHAPE_TOTAL_NUM)
         {
-            case SHAPE_CUSTOM:
-                s = "Custom";// 2
+            case SHAPE_CUSTOM:// 2
+                s = "Custom";
                 break;
             case SHAPE_OVAL:// 1
                 s = "Oval";
