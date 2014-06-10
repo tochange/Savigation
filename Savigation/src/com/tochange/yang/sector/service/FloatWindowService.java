@@ -11,9 +11,9 @@ import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 import android.widget.RemoteViews;
 
-import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
+import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.screenobserver.ScreenObserver.ScreenStateListener;
 import com.tochange.yang.sector.tools.AppUtils;
@@ -433,7 +433,7 @@ public class FloatWindowService extends BaseFloatWindowService
         mScreenObserver.requestScreenStateUpdate(new ScreenStateListener() {
             @Override
             public void onScreenOn()
-            {//no use,yangxj@20140609
+            {// no use,yangxj@20140609
                 doSomethingOnScreenOn();
             }
 
@@ -445,14 +445,18 @@ public class FloatWindowService extends BaseFloatWindowService
 
             @Override
             public void onDialogClose(Intent intent)
-            {//no use,yangxj@20140609
+            {// no use,yangxj@20140609
                 String reason = intent.getStringExtra("reason");
-                if (reason.equals("homekey"))
-                    log.e("home key");
-                else if (reason.equals("recentapps"))
-                    log.e("recentapps key");
-                else
-                    log.e("other");
+                //when alarm comes,this will call,but reason is null
+                if (reason != null)
+                {
+                    if (reason.equals("homekey"))
+                        log.e("home key");
+                    else if (reason.equals("recentapps"))
+                        log.e("recentapps key");
+                    else
+                        log.e("other");
+                }
             }
 
             // @Override
