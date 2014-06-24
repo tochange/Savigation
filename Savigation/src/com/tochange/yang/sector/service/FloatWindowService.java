@@ -37,7 +37,7 @@ public class FloatWindowService extends BaseFloatWindowService
                     : R.drawable.composer_father_ll;
             mFatherItem.setBackgroundResource(res);
             // ensure change the background
-            mSectorButton.invalidate();
+            mMainView.invalidate();
         }
 
         @Override
@@ -67,14 +67,14 @@ public class FloatWindowService extends BaseFloatWindowService
         public boolean onDoubleTap(MotionEvent e)
         {
             if (saveIsReopen(true))
-                mSectorButton.playHiddenAnimation();
+                mMainView.playHiddenAnimation();
             return false;
         }
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e)
         {
-            mSectorButton.doFatherListener();
+            mMainView.doFatherListener();
             return false;
         }
 
@@ -252,10 +252,10 @@ public class FloatWindowService extends BaseFloatWindowService
             // TODO Auto-generated method stub
             super.onPostExecute(result);
             {
-                if (mSectorButton.getSticky())
+                if (mMainView.getSticky())
                 {
-                    mSectorButton.inScaleFather();
-                    mSectorButton.invalidate();
+                    mMainView.inScaleFather();
+                    mMainView.invalidate();
                 }
             }
         }
@@ -302,7 +302,7 @@ public class FloatWindowService extends BaseFloatWindowService
                             : tmp.iconResOff;
                     mChoosedBackClildItemList.get(i).setBackgroundDrawable(
                             getResources().getDrawable(res));
-                    mSectorButton.updateBackPanelChild();
+                    mMainView.updateBackPanelChild();
                 }
             }
 

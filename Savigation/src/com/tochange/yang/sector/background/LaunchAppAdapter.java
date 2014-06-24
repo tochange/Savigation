@@ -12,13 +12,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tochange.yang.sector.R;
-import com.tochange.yang.sector.tools.BackItemInfo;
 
-public class BackAdapter extends BaseAdapter
+public class LaunchAppAdapter extends BaseAdapter
 {
     private LayoutInflater inflater;
 
-    private List<BackItemInfo> mlist;
+    private List<LoadLaunchAppData> mlist;
 
     class SelectViewHolder
     {
@@ -29,7 +28,7 @@ public class BackAdapter extends BaseAdapter
         ImageView image;
     }
 
-    public BackAdapter(Context context, List<BackItemInfo> alllist)
+    public LaunchAppAdapter(Context context, List<LoadLaunchAppData> alllist)
     {
         this.inflater = LayoutInflater.from(context);
         this.mlist = alllist;
@@ -57,34 +56,49 @@ public class BackAdapter extends BaseAdapter
     public View getView(final int position, View convertView, ViewGroup parent)
     {
         SelectViewHolder viewHolder = null;
+        Listener listener = null;
         if (convertView == null)
         {
-            viewHolder = new SelectViewHolder();
             convertView = inflater.inflate(R.layout.list_item, null);
+            viewHolder = new SelectViewHolder();
             viewHolder.text = (TextView) convertView.findViewById(R.id.text);
             viewHolder.image = (ImageView) convertView.findViewById(R.id.image);
             viewHolder.check = (CheckBox) convertView.findViewById(R.id.check);
-
+            listener = new Listener();
+            viewHolder.check.setOnClickListener(listener);
+            convertView.setTag(viewHolder.check.getId(), listener);
             convertView.setTag(viewHolder);
         }
         else
+        {
             viewHolder = (SelectViewHolder) convertView.getTag();
+            listener = (Listener) convertView.getTag(viewHolder.check.getId());
+        }
 
-        viewHolder.text.setText((String) mlist.get(position).name);
-        viewHolder.image.setBackgroundResource(mlist.get(position).iconResOn);
-        if (mlist.get(position).choosed)
-            viewHolder.check.setChecked(true);
-        else
-            viewHolder.check.setChecked(false);
+        final LoadLaunchAppData tmp = mlist.get(position);
+        // log.e(tmp.appName);
+        viewHolder.text.setText((String) tmp.appName);
+        viewHolder.image.setBackgroundDrawable(tmp.appIcon);
+        listener.setItem(tmp);
+        viewHolder.check.setChecked(tmp.choosed);
 
-        viewHolder.check.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v)
-            {
-                mlist.get(position).choosed = !mlist.get(position).choosed;
-            }
-        });
-
-        viewHolder.check.setTag(viewHolder);
         return convertView;
+    }
+
+    class Listener implements View.OnClickListener
+    {
+        LoadLaunchAppData tmp;
+
+        public void setItem(LoadLaunchAppData tmp)
+        {
+            this.tmp = tmp;
+        }
+
+        @Override
+        public void onClick(View arg0)
+        {
+            tmp.choosed = !tmp.choosed;
+        }
+
     }
 }

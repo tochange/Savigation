@@ -22,9 +22,9 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.RelativeLayout;
 
-import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
+import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.shake.ShakeInterface;
 import com.tochange.yang.sector.shake.ShakeListener;
@@ -32,7 +32,7 @@ import com.tochange.yang.sector.tools.AppUtils;
 import com.tochange.yang.sector.tools.BackItemInfo;
 import com.tochange.yang.sector.tools.BackPanelBin;
 import com.tochange.yang.view.Item;
-import com.tochange.yang.view.SectorButton;
+import com.tochange.yang.view.MainView;
 
 public abstract class BaseFloatWindowService extends Service implements
         FloatWindowServiceInterface
@@ -88,7 +88,7 @@ public abstract class BaseFloatWindowService extends Service implements
 
     protected ArrayList<BackItemInfo> mChoosedBackClildList;
 
-    protected SectorButton mSectorButton;
+    protected MainView mMainView;
 
     protected int mEvilMarginTop;
 
@@ -147,7 +147,7 @@ public abstract class BaseFloatWindowService extends Service implements
                 {
                     if (mCanMove)
                     {
-                        mSectorButton.setSticky(!mIsSticky);
+                        mMainView.setSticky(!mIsSticky);
                         stickBorder();
                         mIsSticky = !mIsSticky;
                         mShakeListener.stopShakeListen();
@@ -183,7 +183,7 @@ public abstract class BaseFloatWindowService extends Service implements
         mFloatLayout = (RelativeLayout) LayoutInflater.from(getApplication())
                 .inflate(R.layout.sectorbutton_view, null);
         mWindowManager.addView(mFloatLayout, mLayoutParams);
-        getAndSetSectorButton();
+        getAndSetMainView();
         mFatherItem.setOnTouchListener(new OnTouchListener() {
 
             @Override
@@ -212,10 +212,10 @@ public abstract class BaseFloatWindowService extends Service implements
         });                     
     }
 
-    private void getAndSetSectorButton()
+    private void getAndSetMainView()
     {
-        mSectorButton = (SectorButton) mFloatLayout.findViewById(R.id.sector);
-        mFatherItem = mSectorButton.getFatherItem();
+        mMainView = (MainView) mFloatLayout.findViewById(R.id.sector);
+        mFatherItem = mMainView.getFatherItem();
 
         int value = intentNotReOpen() ? mIntent.getIntExtra(
                 AppUtils.KEY_BACKPANEL_VALUES, -1) : mSharedPreferences.getInt(
@@ -228,10 +228,10 @@ public abstract class BaseFloatWindowService extends Service implements
         mClildItemList.add(AppUtils.ENUM_CHILDORDER.back.ordinal(),
                 mChoosedBackClildItemList);
 
-        mSectorButton.initData(mClildItemList);
-        mEvilMarginTop = mSectorButton.getEvilMarginTop();
+        mMainView.initData(mClildItemList);
+        mEvilMarginTop = mMainView.getEvilMarginTop();
         // mLayoutParams.dimAmount = 0.6f;
-        mSectorButton.setLinster(getChildrenLinster());
+        mMainView.setLinster(getChildrenLinster());
     }
 
     private boolean intentNotReOpen()

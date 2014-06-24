@@ -14,9 +14,9 @@ import com.tochange.yang.sector.tools.AppUtils;
 import com.tochange.yang.sector.tools.BackItemInfo;
 
 public class ListToAdapter {
-	private BackAdapter adapterb;
+	private BackPanelToolsAdapter adapterb;
 
-	private AppAdapter adapter;
+	private LaunchAppAdapter adapter;
 
 	private Context c;
 
@@ -24,7 +24,7 @@ public class ListToAdapter {
 
 	private ListView backListView;
 
-	private ArrayList<AppData> appList;
+	private ArrayList<LoadLaunchAppData> appList;
 
 	private int handleCount;
 
@@ -34,7 +34,7 @@ public class ListToAdapter {
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
-			AppData tmp = (AppData) msg.obj;
+			LoadLaunchAppData tmp = (LoadLaunchAppData) msg.obj;
 			appList.add(tmp);
 			// 5 items notify together will lead to some item show without
 			// notify,so if it was clicked,collapse:The content of the adapter
@@ -46,7 +46,7 @@ public class ListToAdapter {
 	};
 
 	public ListToAdapter(final Context c, ListView lv, ListView mListViewBack,
-			final ArrayList<AppData> mCheckAppList,
+			final ArrayList<LoadLaunchAppData> mCheckAppList,
 			final ArrayList<BackItemInfo> mBackList) {
 		this.c = c;
 		appListView = lv;
@@ -54,7 +54,7 @@ public class ListToAdapter {
 		appList = mCheckAppList;
 		backList = mBackList;
 
-		adapter = new AppAdapter(c, appList);
+		adapter = new LaunchAppAdapter(c, appList);
 		appListView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
@@ -72,7 +72,7 @@ public class ListToAdapter {
 	}
 
 	private void loadAppData() {
-		AppData.getAppList(mUpdateAppListViewHandler, c, appList);
+		LoadLaunchAppData.getAppList(mUpdateAppListViewHandler, c, appList);
 	}
 
 	private void loadBackData() {
@@ -81,7 +81,7 @@ public class ListToAdapter {
 	}
 
 	public void myNotify() {
-		adapterb = new BackAdapter(c, backList);
+		adapterb = new BackPanelToolsAdapter(c, backList);
 		backListView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {

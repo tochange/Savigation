@@ -152,12 +152,14 @@ public class StaticBroadcastReceiver extends BroadcastReceiver
 
     private void showLocation(String num)
     {
-        if (Utils.copyAssetsToFiles(mContext,
-                AppUtils.PHONELOCATION_FILENAME))
+        if (Utils.copyAssetsToFiles(mContext, AppUtils.PHONELOCATION_FILENAME))
         {
             String location = GetLocationByNumber.getCallerInfo(num, mContext);
-            location = appendOperator(num, location);
-            Toast.makeText(mContext, location, Toast.LENGTH_LONG).show();
+            if (!location.equals(""))
+            {
+                location = appendOperator(num, location);
+                Toast.makeText(mContext, location, Toast.LENGTH_LONG).show();
+            }
         }
     }
 

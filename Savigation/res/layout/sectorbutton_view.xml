@@ -3,12 +3,12 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <com.tochange.yang.view.SectorButton
+    <com.tochange.yang.view.MainView
         android:id="@+id/sector"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:background="@drawable/sector_bg_border">
-    </com.tochange.yang.view.SectorButton>
+    </com.tochange.yang.view.MainView>
 
 </RelativeLayout>

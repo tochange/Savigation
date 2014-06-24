@@ -14,7 +14,7 @@ import android.os.Message;
 
 import com.tochange.yang.sector.tools.AppUtils;
 
-public class AppData
+public class LoadLaunchAppData
 {
     public String appName;
 
@@ -24,8 +24,8 @@ public class AppData
 
     public boolean choosed;
 
-    public static ArrayList<AppData> getAppList(final Handler handler,
-            final Context c, ArrayList<AppData> appList)
+    public static ArrayList<LoadLaunchAppData> getAppList(final Handler handler,
+            final Context c, ArrayList<LoadLaunchAppData> appList)
     {
 
         class LoadAppThread extends Thread
@@ -51,10 +51,10 @@ public class AppData
                     {
                         // cann't launcher this app
                         String name = packageInfo.packageName;
-                        AppData tmpInfo = null;
+                        LoadLaunchAppData tmpInfo = null;
                         if (pm.getLaunchIntentForPackage(name) != null)
                         {
-                            tmpInfo = new AppData();
+                            tmpInfo = new LoadLaunchAppData();
                             if (packageList != null)
                                 tmpInfo.choosed = packageList.contains(name);
                             ApplicationInfo appinfo = packageInfo.applicationInfo;

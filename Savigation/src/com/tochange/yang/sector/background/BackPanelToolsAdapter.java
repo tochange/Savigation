@@ -12,12 +12,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tochange.yang.sector.R;
+import com.tochange.yang.sector.tools.BackItemInfo;
 
-public class AppAdapter extends BaseAdapter
+public class BackPanelToolsAdapter extends BaseAdapter
 {
     private LayoutInflater inflater;
 
-    private List<AppData> mlist;
+    private List<BackItemInfo> mlist;
 
     class SelectViewHolder
     {
@@ -28,7 +29,7 @@ public class AppAdapter extends BaseAdapter
         ImageView image;
     }
 
-    public AppAdapter(Context context, List<AppData> alllist)
+    public BackPanelToolsAdapter(Context context, List<BackItemInfo> alllist)
     {
         this.inflater = LayoutInflater.from(context);
         this.mlist = alllist;
@@ -56,34 +57,49 @@ public class AppAdapter extends BaseAdapter
     public View getView(final int position, View convertView, ViewGroup parent)
     {
         SelectViewHolder viewHolder = null;
+        Listener listener = null;
         if (convertView == null)
         {
-            viewHolder = new SelectViewHolder();
             convertView = inflater.inflate(R.layout.list_item, null);
+            viewHolder = new SelectViewHolder();
             viewHolder.text = (TextView) convertView.findViewById(R.id.text);
             viewHolder.image = (ImageView) convertView.findViewById(R.id.image);
             viewHolder.check = (CheckBox) convertView.findViewById(R.id.check);
-
+            listener = new Listener();
+            viewHolder.check.setOnClickListener(listener);
+            convertView.setTag(viewHolder.check.getId(), listener);
             convertView.setTag(viewHolder);
         }
         else
+        {
             viewHolder = (SelectViewHolder) convertView.getTag();
+            listener = (Listener) convertView.getTag(viewHolder.check.getId());
+        }
 
-        final AppData tmp = mlist.get(position);
-//        log.e(tmp.appName);
-
-        viewHolder.text.setText((String) tmp.appName);
-        viewHolder.image.setBackgroundDrawable(tmp.appIcon);
+        
+        final BackItemInfo tmp = mlist.get(position);
+        viewHolder.text.setText(tmp.name);
+        viewHolder.image.setBackgroundResource(tmp.iconResOn);
+        listener.setItem(tmp);
         viewHolder.check.setChecked(tmp.choosed);
-        viewHolder.check.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v)
-            {
-                tmp.choosed = !tmp.choosed;
-            }
-        });
-
-        viewHolder.check.setTag(viewHolder);
 
         return convertView;
+    }
+
+    class Listener implements View.OnClickListener
+    {
+        BackItemInfo tmp;
+
+        public void setItem(BackItemInfo tmp)
+        {
+            this.tmp = tmp;
+        }
+
+        @Override
+        public void onClick(View arg0)
+        {
+            tmp.choosed = !tmp.choosed;
+        }
+
     }
 }

@@ -17,13 +17,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.tochange.yang.R;
 import com.tochange.yang.lib.FZProgressBar;
 import com.tochange.yang.lib.SimpleLogFile;
 import com.tochange.yang.lib.SlideMenu;
 import com.tochange.yang.lib.Utils;
-import com.tochange.yang.sector.background.AppData;
 import com.tochange.yang.sector.background.ListToAdapter;
+import com.tochange.yang.sector.background.LoadLaunchAppData;
 import com.tochange.yang.sector.service.BaseFloatWindowService;
 import com.tochange.yang.sector.service.FloatWindowService;
 import com.tochange.yang.sector.tools.AppUtils;
@@ -43,35 +42,44 @@ public class SectorButtonMainActivity extends Activity implements
 
     private Button start, remove;
 
+    private ImageView menuImage;
+
     private SlideMenu slideMenu;
 
     // app data
-    private ArrayList<AppData> mCheckAppList = new ArrayList<AppData>();
+    private ArrayList<LoadLaunchAppData> mCheckAppList;
 
     // tools data
-    private ArrayList<BackItemInfo> mBackList = new ArrayList<BackItemInfo>();
+    private ArrayList<BackItemInfo> mBackList;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        mCheckAppList = new ArrayList<LoadLaunchAppData>();
+        mBackList = new ArrayList<BackItemInfo>();
         // write log file
         SimpleLogFile.captureLogToFile(this, getApplication().getPackageName());
 
         Utils.setContext(this);
         setContentView(R.layout.main);
         findView();
-        Utils.setProgressBar(FZProgressBar, Color.MAGENTA);
 
         // put app and tools data into adapter
-        ListToAdapter listener = new ListToAdapter(this, mListView,
-                mListViewBack, mCheckAppList, mBackList);
-        listener.myNotify();
+        new ListToAdapter(this, mListView, mListViewBack, mCheckAppList,
+                mBackList).myNotify();
+        setLisenerAndView();
 
-        ImageView menuImage = (ImageView) findViewById(R.id.title_bar_menu_btn);
+    }
+
+    private void setLisenerAndView()
+    {
+        Utils.setProgressBar(FZProgressBar, Color.MAGENTA);
         menuImage.setOnClickListener(this);
         start.setOnClickListener(this);
         remove.setOnClickListener(this);
+
     }
 
     private void findView()
@@ -82,10 +90,12 @@ public class SectorButtonMainActivity extends Activity implements
         mListView = (ListView) findViewById(R.id.listview);
         mListViewBack = (ListView) findViewById(R.id.listview_backpanel);
         FZProgressBar = (FZProgressBar) findViewById(R.id.fancyBar1);
+        menuImage = (ImageView) findViewById(R.id.title_bar_menu_btn);
     }
 
     /**
      * load data,restore in shape preference too
+     * 
      * @author yangxj
      */
     private class PutParameterTask extends AsyncTask<String, Integer, String>
@@ -130,7 +140,7 @@ public class SectorButtonMainActivity extends Activity implements
             int size = 0;
             for (int i = 0; i < allSize; i++)
             {
-                AppData tmp = mCheckAppList.get(i);
+                LoadLaunchAppData tmp = mCheckAppList.get(i);
                 if (tmp.choosed)
                 {
                     String imageString = Utils.drawableToByte(tmp.appIcon);
@@ -156,6 +166,7 @@ public class SectorButtonMainActivity extends Activity implements
 
         /**
          * get those chosen item tools int values
+         * 
          * @return
          */
         private int getBackPanelValue()
