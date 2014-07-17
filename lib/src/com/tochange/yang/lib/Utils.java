@@ -32,6 +32,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -104,28 +105,6 @@ public class Utils
         }
         else
             return true;
-    }
-    public static boolean bitmapToPNGFile(Bitmap b, String fileName)
-    {
-        if (b == null)
-            return false;
-        try
-        {
-            FileOutputStream out = new FileOutputStream(fileName);
-            b.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-        }
-        catch (FileNotFoundException e)
-        {
-            log.e(e.toString());
-        }
-        catch (IOException e)
-        {
-            log.e(e.toString());
-        }
-        return true;
-
     }
     static class FileInfos
     {
@@ -583,6 +562,132 @@ public class Utils
         return result;
     }
 
+    public static boolean bitmapToPNGFile(Bitmap b, String fileName)
+    {
+        if (b == null)
+            return false;
+        try
+        {
+            FileOutputStream out = new FileOutputStream(fileName);
+            b.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+        }
+        catch (FileNotFoundException e)
+        {
+            log.e(e.toString());
+        }
+        catch (IOException e)
+        {
+            log.e(e.toString());
+        }
+        return true;
+    }
+    
+    public static Bitmap getBitmapFromView(View view) {  
+        Bitmap bitmap = null;  
+        try {  
+            int width = view.getWidth();  
+            int height = view.getHeight();  
+            if(width != 0 && height != 0){  
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);  
+                Canvas canvas = new Canvas(bitmap);  
+                view.layout(0, 0, width, height);  
+                view.draw(canvas);  
+            }  
+        } catch (Exception e) {  
+            bitmap = null;  
+            e.getStackTrace();  
+        }  
+        return bitmap;  
+    }
+    
+    //add water mark in right|bottom
+    public static Bitmap addWatermark(Bitmap src, Bitmap watermark) {  
+        if (src == null || watermark  == null) {  
+            log.e("src is null");  
+            return src;  
+        }  
+          
+        int sWid = src.getWidth();  
+        int sHei = src.getHeight();  
+        int wWid = watermark.getWidth();  
+        int wHei = watermark.getHeight();  
+        if (sWid == 0 || sHei == 0) {  
+            return null;  
+        }  
+          
+        if (sWid < wWid || sHei < wHei) {  
+            return src;  
+        }  
+          
+        Bitmap bitmap = Bitmap.createBitmap(sWid, sHei, Config.ARGB_8888);  
+        try {  
+            Canvas cv = new Canvas(bitmap);  
+            cv.drawBitmap(src, 0, 0, null);  
+            cv.drawBitmap(watermark, sWid - wWid - 5, sHei - wHei - 5, null);  
+            cv.save(Canvas.ALL_SAVE_FLAG);  
+            cv.restore();  
+        } catch (Exception e) {  
+            bitmap = null;  
+            e.getStackTrace();  
+        }  
+        return bitmap;  
+    }  
+    
+    
+    public static Bitmap addDeletemark(Bitmap src, Bitmap watermark) {  
+        if (src == null || watermark  == null) {  
+            log.e("src is null");  
+            return src;  
+        }  
+          
+        int sWid = src.getWidth();  
+        int sHei = src.getHeight();  
+        int wWid = watermark.getWidth();  
+        int wHei = watermark.getHeight();  
+        if (sWid == 0 || sHei == 0) {  
+            return null;  
+        }  
+          
+        if (sWid < wWid || sHei < wHei) {  
+            return src;  
+        }  
+          
+        Bitmap bitmap = Bitmap.createBitmap(sWid + wWid / 2, sHei + wHei / 2, Config.ARGB_8888);  
+        try {  
+            Canvas cv = new Canvas(bitmap);  
+            cv.drawBitmap(src, 0, wHei / 2, null);  
+            cv.drawBitmap(watermark, sWid - wWid / 2, 0, null);  
+            cv.save(Canvas.ALL_SAVE_FLAG);  
+            cv.restore();  
+        } catch (Exception e) {  
+            bitmap = null;  
+            e.getStackTrace();  
+        }  
+        return bitmap;  
+    } 
+    
+    public static boolean saveBitmap(Bitmap bitmap,String path, String fileName) {  
+        File file = new File(path);  
+        if (!file.exists()) {  
+            file.mkdir();  
+        }  
+        File imageFile = new File(file, fileName);  
+        try {  
+            imageFile.createNewFile();  
+            FileOutputStream fos = new FileOutputStream(imageFile);  
+            bitmap.compress(CompressFormat.JPEG, 50, fos);  
+            fos.flush();  
+            fos.close();  
+        } catch (FileNotFoundException e) {  
+            e.printStackTrace();  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+        return true;  
+    } 
+    
     public static synchronized String drawableToByte(Drawable drawable)
     {
 
@@ -631,10 +736,9 @@ public class Utils
 
     }
 
-    public static Bitmap getBitmapFromResources(Activity act, int resId)
+    public static Bitmap getBitmapFromResources(Activity activity, int resId)
     {
-        Resources res = act.getResources();
-        return BitmapFactory.decodeResource(res, resId);
+        return BitmapFactory.decodeResource(activity.getResources(), resId);
     }
 
     public static Bitmap convertBytes2Bimap(byte[] b)

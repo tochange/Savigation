@@ -422,20 +422,23 @@ public class BadgeView extends TextView {
      * @param layoutPosition one of POSITION_TOP_LEFT, POSITION_TOP_RIGHT, POSITION_BOTTOM_LEFT, POSITION_BOTTOM_RIGHT, POSTION_CENTER.
      * 
      */
-	public void setBadgePosition(int layoutPosition) {
+	public BadgeView setBadgePosition(int layoutPosition) {
 		this.badgePosition = layoutPosition;
+		return this;
 	}
 	//yangxj@20140523
-	public void setBadgePosition(int l,int t,int r,int b) {
+	public BadgeView setBadgePosition(int left,int top,int right,int bottom) {
         this.badgePosition = POSITION_CUSTOM;
-        position_l = l;
-        position_t = t;
-        position_r = r;
-        position_b = b;
+        position_l = left;
+        position_t = top;
+        position_r = right;
+        position_b = bottom;
+        return this;
     }
 	
-	public void setBadgeBackgroundShape(int shape){
+	public BadgeView setBadgeBackgroundShape(int shape){
 		backgroundshape = shape;
+		return this;
 	}
 	/**
      * Returns the horizontal margin from the target View that is applied to this badge.
@@ -458,9 +461,10 @@ public class BadgeView extends TextView {
      * 
      * @param badgeMargin the margin in pixels.
      */
-	public void setBadgeMargin(int badgeMargin) {
+	public BadgeView setBadgeMargin(int badgeMargin) {
 		this.badgeMarginH = badgeMargin;
 		this.badgeMarginV = badgeMargin;
+		return this;
 	}
 	
 	/**
@@ -469,9 +473,10 @@ public class BadgeView extends TextView {
      * @param horizontal margin in pixels.
      * @param vertical margin in pixels.
      */
-	public void setBadgeMargin(int horizontal, int vertical) {
+	public BadgeView setBadgeMargin(int horizontal, int vertical) {
 		this.badgeMarginH = horizontal;
 		this.badgeMarginV = vertical;
+		return this;
 	}
 	
 	/**
@@ -487,9 +492,10 @@ public class BadgeView extends TextView {
      * 
      * @param badgeColor the badge background color.
      */
-	public void setBadgeBackgroundColor(int badgeColor) {
+	public BadgeView setBadgeBackgroundColor(int badgeColor) {
 		this.badgeColor = badgeColor;
 //		badgeBg = getDefaultBackground();//yangxj@20140524
+		return this;
 	}
 	
 	private int dipToPixels(int dip) {
