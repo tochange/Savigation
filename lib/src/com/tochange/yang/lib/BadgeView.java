@@ -377,8 +377,11 @@ public class BadgeView extends TextView {
 			lp.setMargins(0, 0, 0, 0);
 			break;			
 	    case POSITION_CUSTOM:
-	        lp.gravity = Gravity.TOP ;
+//	        lp.gravity = Gravity.TOP ;
 	        lp.setMargins(position_l, position_t, position_r, position_b);
+	        //yangxj@20140719
+	        int paddingPixels = dipToPixels(DEFAULT_LR_PADDING_DIP);
+	        setPadding(paddingPixels, -paddingPixels, paddingPixels, -paddingPixels);
 	        break;
 	       
 		default:
@@ -498,7 +501,7 @@ public class BadgeView extends TextView {
 		return this;
 	}
 	
-	private int dipToPixels(int dip) {
+	public int dipToPixels(int dip) {
 		Resources r = getResources();
 		float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, r.getDisplayMetrics());
 		return (int) px;

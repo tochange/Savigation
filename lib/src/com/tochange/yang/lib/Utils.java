@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -47,6 +48,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.util.Base64;
@@ -72,6 +74,22 @@ public class Utils
     public static void setContext(Context c)
     {
         mContext = c;
+    }
+    
+    /** 
+     * 根据手机的分辨率从 dp 的单位 转成为 px(像素) 
+     */  
+    public static int dip2px(Context context, float dpValue) {  
+        final float scale = context.getResources().getDisplayMetrics().density;  
+        return (int) (dpValue * scale + 0.5f);  
+    }  
+  
+    /** 
+     * 根据手机的分辨率从 px(像素) 的单位 转成为 dp 
+     */  
+    public static int px2dip(Context context, float pxValue) {  
+        final float scale = context.getResources().getDisplayMetrics().density;  
+        return (int) (pxValue / scale + 0.5f);  
     }
     public static boolean copyAssetsToFiles(Context context, String filaName)
     {
@@ -865,6 +883,49 @@ public class Utils
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return dstbmp;
     }
+    
+    /** 
+     * Checks if the device is a tablet or a phone 
+     *  
+     * @param activityContext 
+     *            The Activity Context. 
+     * @return Returns true if the device is a Tablet 
+     */  
+    public static boolean isTabletDevice(Context activityContext) {  
+        // Verifies if the Generalized Size of the device is XLARGE to be  
+        // considered a Tablet  
+        
+//        yangxj@20140722
+//        boolean xlarge = ((activityContext.getResources().getConfiguration().screenLayout &   
+//                            Configuration.SCREENLAYOUT_SIZE_MASK) ==   
+//                            Configuration.SCREENLAYOUT_SIZE_XLARGE);  
+        boolean xlarge = ((activityContext.getResources().getConfiguration().screenLayout &   
+                Configuration.SCREENLAYOUT_SIZE_MASK) >=   
+                Configuration.SCREENLAYOUT_SIZE_LARGE); 
+        
+        // If XLarge, checks if the Generalized Density is at least MDPI  
+        // (160dpi)  
+        if (xlarge) { 
+            DisplayMetrics metrics = new DisplayMetrics();  
+            Activity activity = (Activity) activityContext;  
+            activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);  
+      
+            // MDPI=160, DEFAULT=160, DENSITY_HIGH=240, DENSITY_MEDIUM=160,  
+            // DENSITY_TV=213, DENSITY_XHIGH=320  
+            if (metrics.densityDpi == DisplayMetrics.DENSITY_DEFAULT  
+                    || metrics.densityDpi == DisplayMetrics.DENSITY_HIGH  
+                    || metrics.densityDpi == DisplayMetrics.DENSITY_MEDIUM  
+                    || metrics.densityDpi == DisplayMetrics.DENSITY_TV  
+                    || metrics.densityDpi == DisplayMetrics.DENSITY_XHIGH) {  
+      
+                // Yes, this is a tablet!  
+                return true;  
+            }  
+        }  
+      
+        // No, this is not a tablet!  
+        return false;  
+    }  
 
     public void setUpFloatWindow(String message)
     {
@@ -951,4 +1012,25 @@ public class Utils
             });
         }
     }
+//    timer = new Timer();
+//    timer.scheduleAtFixedRate(new RefreshTask(), 0, 500);
+//    timer.cancel();
+    
+    class SleepTask extends AsyncTask<String, Integer, String>
+    {
+
+        @Override
+        protected String doInBackground(String... arg0)
+        {
+            Utils.sleep(Integer.parseInt(arg0[0]));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            super.onPostExecute(result);
+        }
+    }
+    // new SleepTask().execute(1 + "");
 }
