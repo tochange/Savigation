@@ -22,8 +22,8 @@ import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Service;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +31,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
@@ -49,6 +48,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.util.Base64;
@@ -76,6 +76,19 @@ public class Utils
         mContext = c;
     }
     
+    public static void showHardwareInfoLog(Context context) {
+		WindowManager windowManager = (WindowManager) context
+				.getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics m = new DisplayMetrics();
+		windowManager.getDefaultDisplay().getMetrics(m);
+		float d = m.density;
+		int dd = m.densityDpi;
+		log.e("density:" + d + ";densityDpi:" + dd + ";screenSize:" + m.widthPixels
+				+ "*" + m.heightPixels + ";MANUFACTURER:"
+				+ Build.MANUFACTURER + ";BRAND:" + Build.BRAND
+				+ ";MODEL:" + Build.MODEL + ";RELEASE:"
+				+ Build.VERSION.RELEASE + ";SDK:" + Build.VERSION.SDK);
+	}
     /** 
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素) 
      */  
