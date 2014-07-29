@@ -2,7 +2,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.tochange.yang.lib.SlideMenu
+    <com.tochange.yang.lib.ui.SlideMenu
         android:id="@+id/slide_menu"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
@@ -49,13 +49,13 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true" >
 
-                <com.tochange.yang.lib.FZProgressBar
+                <com.tochange.yang.lib.ui.FZProgressBar
                     android:id="@+id/fancyBar1"
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"
                     android:visibility="gone" />
             </LinearLayout>
         </RelativeLayout>
-    </com.tochange.yang.lib.SlideMenu>
+    </com.tochange.yang.lib.ui.SlideMenu>
 
 </RelativeLayout>

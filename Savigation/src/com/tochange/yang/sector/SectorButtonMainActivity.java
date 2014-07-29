@@ -17,9 +17,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.tochange.yang.lib.FZProgressBar;
-import com.tochange.yang.lib.SimpleLogFile;
-import com.tochange.yang.lib.SlideMenu;
+import com.tochange.yang.lib.ui.FZProgressBar;
+import com.tochange.yang.lib.utils.SimpleLogFile;
+import com.tochange.yang.lib.ui.SlideMenu;
+import com.tochange.yang.lib.ui.Graphics;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.sector.background.ListToAdapter;
 import com.tochange.yang.sector.background.LoadLaunchAppData;
@@ -70,8 +71,8 @@ public class SectorButtonMainActivity extends Activity implements
         new ListToAdapter(this, mListView, mListViewBack, mCheckAppList,
                 mBackList).myNotify();
         setLisenerAndView();
-
     }
+
 
     private void setLisenerAndView()
     {
@@ -143,7 +144,7 @@ public class SectorButtonMainActivity extends Activity implements
                 LoadLaunchAppData tmp = mCheckAppList.get(i);
                 if (tmp.choosed)
                 {
-                    String imageString = Utils.drawableToByte(tmp.appIcon);
+                    String imageString = Graphics.drawableToByte(tmp.appIcon);
                     intent.putExtra(AppUtils.KEY_PACKAGENAME + size,
                             tmp.packageName);
                     intent.putExtra(AppUtils.KEY_IMAGESTRING + size,

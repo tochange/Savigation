@@ -12,7 +12,6 @@
         <item>180</item><!--line moving-->
         <item>400</item><!--scale -->
         <item>680</item><!--child rotate -->
-            
     </string-array>
     
     <string-array name ="phone_location">

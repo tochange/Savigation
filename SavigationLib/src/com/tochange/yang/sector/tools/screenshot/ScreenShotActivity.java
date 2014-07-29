@@ -23,7 +23,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.tochange.yang.R;
-import com.tochange.yang.lib.FZProgressBar;
+import com.tochange.yang.lib.ui.FZProgressBar;
+import com.tochange.yang.lib.ui.ScreenLib;
+import com.tochange.yang.lib.ui.Graphics;
+import com.tochange.yang.lib.utils.TimeFormatHelper;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.sector.tools.AppUtils;
 
@@ -117,7 +120,7 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
     {
         mCancel.setText(R.string.cancel_exit);
         mCut.setText(R.string.ok_full);
-        mStatusBarHeight = Utils.getStatusBarHeight(ScreenShotActivity.this);
+        mStatusBarHeight = ScreenLib.getStatusBarHeight(ScreenShotActivity.this);
         mDisplayMetrics = getResources().getDisplayMetrics();
         Utils.setProgressBar(FZProgressBar, Color.MAGENTA, Color.CYAN);
     }
@@ -279,21 +282,21 @@ public class ScreenShotActivity extends Activity implements OnClickListener,
             {
                 mPicName = PATH + File.separator
                         + AppUtils.SCREENSHOT_PICPREFIX
-                        + Utils.getCurTimeToString(-1, 0) + ".png";
+                        + TimeFormatHelper.getCurTimeToString(-1, 0) + ".png";
                 if (mShape % SHAPE_TOTAL_NUM == SHAPE_CUSTOM)
                 {
-                    cutSuccess = (p == null) ? Utils.bitmapToPNGFile(ret,
-                            mPicName) : Utils.bitmapToPNGFile(
-                            Utils.getPathBitmap(ret, p), mPicName);
+                    cutSuccess = (p == null) ? Graphics.bitmapToPNGFile(ret,
+                            mPicName) : Graphics.bitmapToPNGFile(
+                                    Graphics.getPathBitmap(ret, p), mPicName);
                     return null;
                 }
                 if (cropRect != null)
                 {// rectangle
                     ret = cropImage(ret, cropRect);
                     if (mShape % SHAPE_TOTAL_NUM == SHAPE_OVAL)
-                        ret = Utils.getOval(ret);
+                        ret = Graphics.getOval(ret);
                 }
-                cutSuccess = Utils.bitmapToPNGFile(ret, mPicName);
+                cutSuccess = Graphics.bitmapToPNGFile(ret, mPicName);
             }
             return null;
         }

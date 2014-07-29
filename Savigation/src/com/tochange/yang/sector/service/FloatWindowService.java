@@ -13,6 +13,8 @@ import android.widget.RemoteViews;
 
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
+import com.tochange.yang.lib.ui.ScreenLib;
+import com.tochange.yang.lib.utils.ApkInstaller;
 import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.screenobserver.ScreenObserver.ScreenStateListener;
@@ -51,7 +53,7 @@ public class FloatWindowService extends BaseFloatWindowService
                         - mFatherItem.getMeasuredWidth() / 2;
                 mLayoutParams.y = (int) e2.getRawY()
                         - mFatherItem.getMeasuredHeight() / 2
-                        - Utils.getStatusBarHeight(FloatWindowService.this);
+                        - ScreenLib.getStatusBarHeight(FloatWindowService.this);
 
                 // log.e("mLayoutParams.y=" + mLayoutParams.y
                 // + "  mLayoutParams.x=" + mLayoutParams.x);
@@ -321,7 +323,7 @@ public class FloatWindowService extends BaseFloatWindowService
         @Override
         protected String doInBackground(String... arg0)
         {
-            Utils.openAppTroublesome(FloatWindowService.this,
+            ApkInstaller.openAppTroublesome(FloatWindowService.this,
                     getPackageName(Integer.parseInt(arg0[0])));
             return null;
         }

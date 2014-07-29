@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
+import com.tochange.yang.lib.ui.Graphics;
 import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.screenobserver.ScreenObserver;
 import com.tochange.yang.sector.shake.ShakeInterface;
@@ -137,7 +138,7 @@ public abstract class BaseFloatWindowService extends Service implements
         if (mCanNew)
         {
             mCanNew = false;
-            createFloatView();
+            createFloatView(mLayoutParams);
 
             mCanReStartShake = true;
             mAlreadyDestory = false;
@@ -178,11 +179,11 @@ public abstract class BaseFloatWindowService extends Service implements
 
     }
 
-    private void createFloatView()
+    private void createFloatView(LayoutParams lp)
     {
         mFloatLayout = (RelativeLayout) LayoutInflater.from(getApplication())
                 .inflate(R.layout.sectorbutton_view, null);
-        mWindowManager.addView(mFloatLayout, mLayoutParams);
+        mWindowManager.addView(mFloatLayout, lp);
         getAndSetMainView();
         mFatherItem.setOnTouchListener(new OnTouchListener() {
 
@@ -304,6 +305,7 @@ public abstract class BaseFloatWindowService extends Service implements
         return resultList;
     }
 
+    @SuppressWarnings("deprecation")
     private void addImageStringToChildList(String imageString,
             List<Item> resultList)
     {
@@ -311,8 +313,8 @@ public abstract class BaseFloatWindowService extends Service implements
         // no round corner
         // child.setImageDrawable(Utils.byteToDrawable(imageString));
 
-        child.setBackgroundDrawable(Utils.convertBitmap2Drawable((Utils
-                .getOval(Utils.string2Bitmap(imageString)))));
+        child.setBackgroundDrawable(Graphics.convertBitmap2Drawable((Graphics
+                .getOval(Graphics.string2Bitmap(imageString)))));
         resultList.add(child);
 
     }

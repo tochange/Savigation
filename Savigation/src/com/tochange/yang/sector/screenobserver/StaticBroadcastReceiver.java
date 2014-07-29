@@ -16,9 +16,10 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-import com.tochange.yang.R;
 import com.tochange.yang.lib.Utils;
 import com.tochange.yang.lib.log;
+import com.tochange.yang.lib.utils.FileOperateHelper;
+import com.tochange.yang.sector.R;
 import com.tochange.yang.sector.service.BaseFloatWindowService;
 import com.tochange.yang.sector.service.FloatWindowService;
 import com.tochange.yang.sector.tools.AppUtils;
@@ -152,7 +153,7 @@ public class StaticBroadcastReceiver extends BroadcastReceiver
 
     private void showLocation(String num)
     {
-        if (Utils.copyAssetsToFiles(mContext, AppUtils.PHONELOCATION_FILENAME))
+        if (FileOperateHelper.copyAssetsToFiles(mContext, AppUtils.PHONELOCATION_FILENAME))
         {
             String location = GetLocationByNumber.getCallerInfo(num, mContext);
             if (!location.equals(""))
